@@ -15,16 +15,13 @@ O foco está em oferecer uma interface intuitiva para agentes de campo e uma vis
 ## 🧰 Tecnologias Utilizadas
 
 ### Frontend
-- [Angular](https://angular.io/) – Framework SPA moderno para a interface do usuário
-- [TypeScript](https://www.typescriptlang.org/) – Superset de JavaScript com tipagem estática
-- [HTML5](https://developer.mozilla.org/pt-BR/docs/Web/HTML)
-- [CSS3](https://developer.mozilla.org/pt-BR/docs/Web/CSS)
+<img src="https://skillicons.dev/icons?i=angular,ts,html,css" />
 
 ### Backend
-- [Node.js](https://nodejs.org/)
-- [Express](https://expressjs.com/) – Framework leve para API REST
-- [MongoDB](https://www.mongodb.com/) – Banco de dados NoSQL
+<img src="https://skillicons.dev/icons?i=nodejs,java,js,git" />
 
+### IDEs e Ferramentas
+<img src="https://skillicons.dev/icons?i=idea,vscode,mysql" />
 ---
 
 ## 📌 Funcionalidades Principais
