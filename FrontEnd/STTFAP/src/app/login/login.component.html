@@ -1,0 +1,23 @@
+<div class="container-geral">
+    <div class="logo">
+        <p class="stt">STT FAP</p>
+    </div>
+    <div class="login">
+        <h2>Login</h2>
+      
+        <form class="form" (ngSubmit)="onSubmit()" #loginForm="ngForm">
+          <div class="form-group">
+            <label for="email">E-mail:</label>
+            <input type="email" id="email" name="email" [(ngModel)] required />
+          </div>
+      
+          <div class="form-group">
+            <label for="senha">Senha:</label>
+            <input type="password" id="senha" name="senha" [(ngModel)] required />
+          </div>
+      
+          <button type="submit">Entrar</button>
+        </form>
+      </div>
+      
+</div>
