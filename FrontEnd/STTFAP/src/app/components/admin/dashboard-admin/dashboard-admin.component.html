@@ -1,0 +1,266 @@
+<div class="dashboard-admin">
+  <!-- Header -->
+  <div class="dashboard-header">
+    <h1>Dashboard Administrativo</h1>
+    <div class="header-actions">
+      <span class="ultima-atualizacao">
+        Última atualização: {{ formatarData(ultimaAtualizacao) }} às {{ ultimaAtualizacao.toLocaleTimeString('pt-BR') }}
+      </span>
+      <button class="btn-refresh" (click)="carregarDadosIniciais()" [disabled]="carregandoDados">
+        <span [class.spinning]="carregandoDados">🔄</span> Atualizar
+      </button>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="filtros-container">
+    <div class="filtros-row">
+      <div class="filtro-grupo">
+        <label>Período:</label>
+        <input type="date" [(ngModel)]="periodoInicio" class="input-date">
+        <span>até</span>
+        <input type="date" [(ngModel)]="periodoFim" class="input-date">
+      </div>
+      
+      <div class="filtro-grupo">
+        <label>Unidades:</label>
+        <select multiple [(ngModel)]="unidadesSelecionadas" class="select-multiple">
+          <option *ngFor="let unidade of unidadesDisponiveis" [value]="unidade.id">
+            {{ unidade.nome }}
+          </option>
+        </select>
+      </div>
+      
+      <div class="filtro-grupo">
+        <label>Equipamentos:</label>
+        <select multiple [(ngModel)]="tiposEquipamento" class="select-multiple">
+          <option *ngFor="let tipo of tiposEquipamentoDisponiveis" [value]="tipo">
+            {{ tipo }}
+          </option>
+        </select>
+      </div>
+      
+      <div class="filtro-acoes">
+        <button class="btn-aplicar" (click)="aplicarFiltros()">Aplicar</button>
+        <button class="btn-limpar" (click)="limparFiltros()">Limpar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="carregandoDados" class="loading-container">
+    <div class="spinner"></div>
+    <p>Carregando dados...</p>
+  </div>
+
+  <!-- Erro -->
+  <div *ngIf="erroCarregamento" class="erro-container">
+    <p>{{ erroCarregamento }}</p>
+    <button (click)="carregarDadosIniciais()">Tentar novamente</button>
+  </div>
+
+  <!-- Conteúdo Principal -->
+  <div *ngIf="!carregandoDados && !erroCarregamento" class="dashboard-content">
+    
+    <!-- Cards de Métricas -->
+    <div class="metricas-grid">
+      <div class="metric-card" (click)="navegarPara('/admin/extintores')">
+        <div class="metric-icon">🧯</div>
+        <div class="metric-info">
+          <h3>{{ metrics.totalExtintores }}</h3>
+          <p>Total de Extintores</p>
+        </div>
+      </div>
+
+      <div class="metric-card alerta" (click)="navegarPara('/admin/inspecoes', {status: 'pendente'})">
+        <div class="metric-icon">⏰</div>
+        <div class="metric-info">
+          <h3>{{ metrics.inspecoesPendentes }}</h3>
+          <p>Inspeções Pendentes</p>
+        </div>
+      </div>
+
+      <div class="metric-card" (click)="navegarPara('/admin/usuarios')">
+        <div class="metric-icon">👥</div>
+        <div class="metric-info">
+          <h3>{{ metrics.usuariosAtivos }}</h3>
+          <p>Usuários Ativos</p>
+        </div>
+      </div>
+
+      <div class="metric-card" (click)="navegarPara('/admin/unidades')">
+        <div class="metric-icon">🏢</div>
+        <div class="metric-info">
+          <h3>{{ metrics.unidadesOperacionais }}</h3>
+          <p>Unidades Operacionais</p>
+        </div>
+      </div>
+
+      <div class="metric-card conformidade" [style.border-left-color]="obterCorConformidade(metrics.conformidadeGeral)">
+        <div class="metric-icon">📊</div>
+        <div class="metric-info">
+          <h3>{{ metrics.conformidadeGeral }}%</h3>
+          <p>Conformidade Geral</p>
+        </div>
+      </div>
+
+      <div class="metric-card critico" (click)="navegarPara('/admin/alertas')">
+        <div class="metric-icon">🚨</div>
+        <div class="metric-info">
+          <h3>{{ metrics.alertasCriticos }}</h3>
+          <p>Alertas Críticos</p>
+        </div>
+      </div>
+
+      <div class="metric-card" (click)="navegarPara('/admin/servicos')">
+        <div class="metric-icon">⚙️</div>
+        <div class="metric-info">
+          <h3>{{ metrics.servicosAtivos }}</h3>
+          <p>Serviços Ativos</p>
+        </div>
+      </div>
+
+      <div class="metric-card alerta" (click)="navegarPara('/admin/documentos', {status: 'vencido'})">
+        <div class="metric-icon">📄</div>
+        <div class="metric-info">
+          <h3>{{ metrics.documentosVencidos }}</h3>
+          <p>Documentos Vencidos</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gráficos e Tabelas -->
+    <div class="dashboard-grid">
+      
+      <!-- Alertas Críticos -->
+      <div class="dashboard-card">
+        <div class="card-header">
+          <h3>Alertas Críticos</h3>
+          <button class="btn-ver-todos" (click)="navegarPara('/admin/alertas')">Ver todos</button>
+        </div>
+        <div class="alertas-lista">
+          <div *ngFor="let alerta of alertasCriticos" 
+               class="alerta-item" 
+               [ngClass]="obterClasseAlerta(alerta.prioridade)">
+            <div class="alerta-icon">{{ obterIconeAlerta(alerta.tipo) }}</div>
+            <div class="alerta-info">
+              <h4>{{ alerta.descricao }}</h4>
+              <p>{{ alerta.unidade }} - {{ formatarData(alerta.dataVencimento) }}</p>
+              <span *ngIf="alerta.responsavel" class="responsavel">{{ alerta.responsavel }}</span>
+            </div>
+            <div class="alerta-prioridade">{{ alerta.prioridade }}</div>
+          </div>
+          <div *ngIf="alertasCriticos.length === 0" class="sem-alertas">
+            ✅ Nenhum alerta crítico no momento
+          </div>
+        </div>
+      </div>
+
+      <!-- Performance dos Técnicos -->
+      <div class="dashboard-card">
+        <div class="card-header">
+          <h3>Performance dos Técnicos</h3>
+          <button class="btn-ver-todos" (click)="navegarPara('/admin/tecnicos')">Ver todos</button>
+        </div>
+        <div class="tecnicos-lista">
+          <div *ngFor="let tecnico of performanceTecnicos" class="tecnico-item">
+            <div class="tecnico-info">
+              <h4>{{ tecnico.nome }}</h4>
+              <div class="tecnico-stats">
+                <span class="stat">
+                  <strong>{{ tecnico.inspecoesRealizadas }}</strong> realizadas
+                </span>
+                <span class="stat">
+                  <strong>{{ tecnico.inspecoesPendentes }}</strong> pendentes
+                </span>
+                <span class="stat">
+                  <strong>{{ formatarTempo(tecnico.mediaTempoInspecao) }}</strong> tempo médio
+                </span>
+              </div>
+            </div>
+            <div class="tecnico-qualidade">
+              <div class="qualidade-bar">
+                <div class="qualidade-fill" 
+                     [style.width.%]="tecnico.avaliacaoQualidade"
+                     [style.background-color]="obterCorConformidade(tecnico.avaliacaoQualidade)">
+                </div>
+              </div>
+              <span>{{ tecnico.avaliacaoQualidade }}%</span>
+            </div>
+          </div>
+          <div *ngIf="performanceTecnicos.length === 0" class="sem-dados">
+            📊 Nenhum dado de performance disponível
+          </div>
+        </div>
+      </div>
+
+      <!-- Inspeções por Período -->
+      <div class="dashboard-card full-width">
+        <div class="card-header">
+          <h3>Inspeções por Período</h3>
+          <div class="export-actions">
+            <button class="btn-export" (click)="exportarDashboard('PDF')">📄 PDF</button>
+            <button class="btn-export" (click)="exportarDashboard('EXCEL')">📊 Excel</button>
+          </div>
+        </div>
+        <div class="inspecoes-chart">
+          <div *ngFor="let periodo of inspecoesPorPeriodo" class="periodo-item">
+            <div class="periodo-label">{{ periodo.periodo }}</div>
+            <div class="periodo-bars">
+              <div class="bar realizadas" 
+                   [style.width.%]="(periodo.realizadas / (periodo.realizadas + periodo.pendentes + periodo.atrasadas)) * 100">
+                <span>{{ periodo.realizadas }}</span>
+              </div>
+              <div class="bar pendentes" 
+                   [style.width.%]="(periodo.pendentes / (periodo.realizadas + periodo.pendentes + periodo.atrasadas)) * 100">
+                <span>{{ periodo.pendentes }}</span>
+              </div>
+              <div class="bar atrasadas" 
+                   [style.width.%]="(periodo.atrasadas / (periodo.realizadas + periodo.pendentes + periodo.atrasadas)) * 100">
+                <span>{{ periodo.atrasadas }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="legenda">
+            <span class="legenda-item realizadas">Realizadas</span>
+            <span class="legenda-item pendentes">Pendentes</span>
+            <span class="legenda-item atrasadas">Atrasadas</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Ações Rápidas -->
+    <div class="acoes-rapidas">
+      <h3>Ações Rápidas</h3>
+      <div class="acoes-grid">
+        <button class="acao-btn" (click)="navegarPara('/admin/usuarios/novo')">
+          <span class="acao-icon">👤</span>
+          <span>Novo Usuário</span>
+        </button>
+        <button class="acao-btn" (click)="navegarPara('/admin/unidades/nova')">
+          <span class="acao-icon">🏢</span>
+          <span>Nova Unidade</span>
+        </button>
+        <button class="acao-btn" (click)="navegarPara('/admin/servicos/novo')">
+          <span class="acao-icon">⚙️</span>
+          <span>Novo Serviço</span>
+        </button>
+        <button class="acao-btn" (click)="navegarPara('/admin/relatorios')">
+          <span class="acao-icon">📊</span>
+          <span>Relatórios</span>
+        </button>
+        <button class="acao-btn" (click)="navegarPara('/admin/configuracoes')">
+          <span class="acao-icon">⚙️</span>
+          <span>Configurações</span>
+        </button>
+        <button class="acao-btn" (click)="navegarPara('/admin/backup')">
+          <span class="acao-icon">💾</span>
+          <span>Backup</span>
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>

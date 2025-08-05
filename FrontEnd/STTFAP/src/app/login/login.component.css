@@ -69,6 +69,21 @@
     background-color: #0056b3;
   }
   
+  button:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+  }
+  
+  .alert-error {
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 15px;
+    border: 1px solid #f5c6cb;
+    font-size: 0.9rem;
+  }
+  
 
 
 .stt {
