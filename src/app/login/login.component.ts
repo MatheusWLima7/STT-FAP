@@ -1,9 +1,1 @@
-@@ .. @@
-           // Redirecionar baseado no tipo de usuário
-           if (this.authService.isAdmin()) {
-             this.router.navigate(['/admin/dashboard']);
-           } else {
--            this.router.navigate(['/menu']);
-+            this.router.navigate(['/tecnico/dashboard']);
-           }
-         },
+{"code":"rate-limited","message":"You have hit the rate limit. Please upgrade to keep chatting.","providerLimitHit":false,"isRetryable":true}
