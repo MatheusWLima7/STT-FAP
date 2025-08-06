@@ -1,0 +1,207 @@
+<div class="dashboard-tecnico">
+  <!-- Header -->
+  <div class="dashboard-header">
+    <div class="welcome-section">
+      <h1>Olá, {{ tecnicoNome }}! 👋</h1>
+      <p>Bem-vindo ao seu painel de trabalho</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn-refresh" (click)="carregarDashboard()" [disabled]="loading">
+        <span [class.spinning]="loading">🔄</span> Atualizar
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading-container">
+    <div class="spinner"></div>
+    <p>Carregando seus dados...</p>
+  </div>
+
+  <!-- Erro -->
+  <div *ngIf="error" class="erro-container">
+    <p>{{ error }}</p>
+    <button (click)="carregarDashboard()">Tentar novamente</button>
+  </div>
+
+  <!-- Conteúdo Principal -->
+  <div *ngIf="!loading && !error" class="dashboard-content">
+    
+    <!-- Cards de Métricas -->
+    <div class="metricas-grid">
+      <div class="metric-card" (click)="navegarPara('/servicos')">
+        <div class="metric-icon">📋</div>
+        <div class="metric-info">
+          <h3>{{ metrics.servicosDesignados }}</h3>
+          <p>Serviços Designados</p>
+        </div>
+      </div>
+
+      <div class="metric-card andamento" (click)="navegarPara('/servicos?status=EM_ANDAMENTO')">
+        <div class="metric-icon">⚙️</div>
+        <div class="metric-info">
+          <h3>{{ metrics.servicosEmAndamento }}</h3>
+          <p>Em Andamento</p>
+        </div>
+      </div>
+
+      <div class="metric-card concluido" (click)="navegarPara('/servicos?status=CONCLUIDO')">
+        <div class="metric-icon">✅</div>
+        <div class="metric-info">
+          <h3>{{ metrics.servicosConcluidos }}</h3>
+          <p>Concluídos</p>
+        </div>
+      </div>
+
+      <div class="metric-card pendente" (click)="navegarPara('/inspecoes')">
+        <div class="metric-icon">🔍</div>
+        <div class="metric-info">
+          <h3>{{ metrics.inspecoesPendentes }}</h3>
+          <p>Inspeções Pendentes</p>
+        </div>
+      </div>
+
+      <div class="metric-card alerta" (click)="navegarPara('/notificacoes')">
+        <div class="metric-icon">🚨</div>
+        <div class="metric-info">
+          <h3>{{ metrics.alertasAtivos }}</h3>
+          <p>Alertas Ativos</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dashboard Grid -->
+    <div class="dashboard-grid">
+      
+      <!-- Serviços Recentes -->
+      <div class="dashboard-card">
+        <div class="card-header">
+          <h3>Meus Serviços</h3>
+          <button class="btn-ver-todos" (click)="navegarPara('/servicos')">Ver todos</button>
+        </div>
+        <div class="servicos-lista">
+          <div *ngFor="let servico of servicosRecentes" class="servico-item">
+            <div class="servico-info">
+              <h4>{{ servico.titulo }}</h4>
+              <p>{{ servico.descricao }}</p>
+              <div class="servico-meta">
+                <span class="badge" [ngClass]="obterClasseStatus(servico.status)">
+                  {{ servico.status }}
+                </span>
+                <span class="badge" [ngClass]="obterClassePrioridade(servico.prioridade)">
+                  {{ servico.prioridade }}
+                </span>
+                <span class="data">{{ formatarData(servico.dataInicio) }}</span>
+              </div>
+            </div>
+            <div class="servico-actions">
+              <button *ngIf="servico.status === 'DESIGNADO'" 
+                      class="btn-action btn-primary" 
+                      (click)="iniciarServico(servico)">
+                Iniciar
+              </button>
+              <button *ngIf="servico.status === 'EM_ANDAMENTO'" 
+                      class="btn-action btn-warning" 
+                      (click)="solicitarProrrogacao(servico)">
+                Prorrogar
+              </button>
+            </div>
+          </div>
+          <div *ngIf="servicosRecentes.length === 0" class="sem-dados">
+            📋 Nenhum serviço designado no momento
+          </div>
+        </div>
+      </div>
+
+      <!-- Inspeções Pendentes -->
+      <div class="dashboard-card">
+        <div class="card-header">
+          <h3>Inspeções Pendentes</h3>
+          <button class="btn-ver-todos" (click)="navegarPara('/inspecoes')">Ver todas</button>
+        </div>
+        <div class="inspecoes-lista">
+          <div *ngFor="let inspecao of inspecoesPendentes" class="inspecao-item">
+            <div class="inspecao-info">
+              <h4>Extintor {{ inspecao.extintorCodigo }}</h4>
+              <p>{{ inspecao.unidadeNome }}</p>
+              <div class="inspecao-meta">
+                <span class="badge" [ngClass]="obterClasseStatus(inspecao.status)">
+                  {{ inspecao.status }}
+                </span>
+                <span class="data">{{ formatarData(inspecao.dataAgendada) }}</span>
+              </div>
+            </div>
+            <div class="inspecao-actions">
+              <button class="btn-action btn-primary" (click)="realizarInspecao(inspecao)">
+                Realizar
+              </button>
+            </div>
+          </div>
+          <div *ngIf="inspecoesPendentes.length === 0" class="sem-dados">
+            🔍 Nenhuma inspeção pendente
+          </div>
+        </div>
+      </div>
+
+      <!-- Notificações -->
+      <div class="dashboard-card full-width">
+        <div class="card-header">
+          <h3>Notificações Recentes</h3>
+          <button class="btn-ver-todos" (click)="navegarPara('/notificacoes')">Ver todas</button>
+        </div>
+        <div class="notificacoes-lista">
+          <div *ngFor="let notificacao of notificacoes" 
+               class="notificacao-item"
+               [class.nao-lida]="!notificacao.lida"
+               (click)="marcarNotificacaoLida(notificacao)">
+            <div class="notificacao-icon">
+              {{ obterIconeNotificacao(notificacao.tipo) }}
+            </div>
+            <div class="notificacao-info">
+              <h4>{{ notificacao.titulo }}</h4>
+              <p>{{ notificacao.mensagem }}</p>
+              <span class="data">{{ formatarDataHora(notificacao.dataEnvio) }}</span>
+            </div>
+            <div *ngIf="!notificacao.lida" class="indicador-nao-lida"></div>
+          </div>
+          <div *ngIf="notificacoes.length === 0" class="sem-dados">
+            📢 Nenhuma notificação recente
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Ações Rápidas -->
+    <div class="acoes-rapidas">
+      <h3>Ações Rápidas</h3>
+      <div class="acoes-grid">
+        <button class="acao-btn" (click)="navegarPara('/inspecoes/nova')">
+          <span class="acao-icon">🔍</span>
+          <span>Nova Inspeção</span>
+        </button>
+        <button class="acao-btn" (click)="navegarPara('/extintores')">
+          <span class="acao-icon">🧯</span>
+          <span>Consultar Extintores</span>
+        </button>
+        <button class="acao-btn" (click)="navegarPara('/relatorios')">
+          <span class="acao-icon">📊</span>
+          <span>Meus Relatórios</span>
+        </button>
+        <button class="acao-btn" (click)="navegarPara('/agenda')">
+          <span class="acao-icon">📅</span>
+          <span>Minha Agenda</span>
+        </button>
+        <button class="acao-btn" (click)="navegarPara('/perfil')">
+          <span class="acao-icon">👤</span>
+          <span>Meu Perfil</span>
+        </button>
+        <button class="acao-btn" (click)="navegarPara('/ajuda')">
+          <span class="acao-icon">❓</span>
+          <span>Ajuda</span>
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>

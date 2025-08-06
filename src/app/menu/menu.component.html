@@ -1,0 +1,46 @@
+@@ .. @@
+-<p>menu works!</p>
++<div class="menu-container">
++  <div class="menu-header">
++    <h1>Sistema STT-FAP</h1>
++    <p>Selecione uma opção para continuar</p>
++  </div>
++
++  <div class="menu-grid">
++    <div class="menu-card" routerLink="/admin/dashboard" *ngIf="isAdmin()">
++      <div class="card-icon">👨‍💼</div>
++      <h3>Dashboard Admin</h3>
++      <p>Painel administrativo completo</p>
++    </div>
++
++    <div class="menu-card" routerLink="/tecnico/dashboard" *ngIf="isTecnico()">
++      <div class="card-icon">🔧</div>
++      <h3>Dashboard Técnico</h3>
++      <p>Painel do técnico</p>
++    </div>
++
++    <div class="menu-card" routerLink="/extintores">
++      <div class="card-icon">🧯</div>
++      <h3>Extintores</h3>
++      <p>Gerenciar extintores</p>
++    </div>
++
++    <div class="menu-card" routerLink="/admin/unidades" *ngIf="isAdmin()">
++      <div class="card-icon">🏢</div>
++      <h3>Unidades</h3>
++      <p>Gerenciar unidades operacionais</p>
++    </div>
++
++    <div class="menu-card" routerLink="/admin/usuarios" *ngIf="isAdmin()">
++      <div class="card-icon">👥</div>
++      <h3>Usuários</h3>
++      <p>Gerenciar usuários do sistema</p>
++    </div>
++
++    <div class="menu-card" (click)="logout()">
++      <div class="card-icon">🚪</div>
++      <h3>Sair</h3>
++      <p>Fazer logout do sistema</p>
++    </div>
++  </div>
++</div>

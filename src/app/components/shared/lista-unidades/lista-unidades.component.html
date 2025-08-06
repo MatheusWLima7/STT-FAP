@@ -1,0 +1,145 @@
+<div class="lista-unidades">
+  <div class="page-header">
+    <h1>Unidades Operacionais</h1>
+    <div class="header-actions">
+      <button class="btn-primary" (click)="novaUnidade()">
+        + Nova Unidade
+      </button>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="filtros-container">
+    <div class="filtros-row">
+      <div class="filtro-grupo">
+        <label>Nome:</label>
+        <input type="text" 
+               [(ngModel)]="filtroNome" 
+               (input)="aplicarFiltros()"
+               placeholder="Buscar por nome..."
+               class="input-filtro">
+      </div>
+      
+      <div class="filtro-grupo">
+        <label>Tipo:</label>
+        <select [(ngModel)]="filtroTipo" 
+                (change)="aplicarFiltros()"
+                class="select-filtro">
+          <option *ngFor="let tipo of tiposUnidade" [value]="tipo.value">
+            {{ tipo.label }}
+          </option>
+        </select>
+      </div>
+      
+      <div class="filtro-grupo">
+        <label>Status:</label>
+        <select [(ngModel)]="filtroStatus" 
+                (change)="aplicarFiltros()"
+                class="select-filtro">
+          <option *ngFor="let status of statusOptions" [value]="status.value">
+            {{ status.label }}
+          </option>
+        </select>
+      </div>
+      
+      <div class="filtro-acoes">
+        <button class="btn-limpar" (click)="limparFiltros()">Limpar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading-container">
+    <div class="spinner"></div>
+    <p>Carregando unidades...</p>
+  </div>
+
+  <!-- Erro -->
+  <div *ngIf="error" class="erro-container">
+    <p>{{ error }}</p>
+    <button (click)="carregarUnidades()">Tentar novamente</button>
+  </div>
+
+  <!-- Lista de Unidades -->
+  <div *ngIf="!loading && !error" class="unidades-container">
+    
+    <div class="resultados-info">
+      <p>{{ unidadesFiltradas.length }} unidade(s) encontrada(s)</p>
+    </div>
+
+    <div class="unidades-grid">
+      <div *ngFor="let unidade of unidadesFiltradas" class="unidade-card">
+        
+        <div class="card-header">
+          <div class="unidade-info">
+            <h3>{{ unidade.nome }}</h3>
+            <div class="badges">
+              <span class="badge" [ngClass]="obterClasseTipo(unidade.tipo)">
+                {{ unidade.tipo }}
+              </span>
+              <span class="badge" [ngClass]="obterClasseStatus(unidade.status)">
+                {{ unidade.status }}
+              </span>
+            </div>
+          </div>
+          <div class="card-actions">
+            <button class="btn-icon" (click)="editarUnidade(unidade.id)" title="Editar">
+              ✏️
+            </button>
+            <button class="btn-icon" (click)="alterarStatus(unidade)" 
+                    [title]="unidade.status === 'ATIVA' ? 'Desativar' : 'Ativar'">
+              {{ unidade.status === 'ATIVA' ? '⏸️' : '▶️' }}
+            </button>
+            <button class="btn-icon btn-danger" (click)="excluirUnidade(unidade)" title="Excluir">
+              🗑️
+            </button>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <div class="info-row">
+            <span class="label">📍 Endereço:</span>
+            <span>{{ unidade.endereco }}, {{ unidade.cidade }}/{{ unidade.estado }}</span>
+          </div>
+          
+          <div class="info-row">
+            <span class="label">📞 Telefone:</span>
+            <span>{{ unidade.telefone }}</span>
+          </div>
+          
+          <div class="info-row">
+            <span class="label">📧 E-mail:</span>
+            <span>{{ unidade.email }}</span>
+          </div>
+          
+          <div *ngIf="unidade.responsavelNome" class="info-row">
+            <span class="label">👤 Responsável:</span>
+            <span>{{ unidade.responsavelNome }}</span>
+          </div>
+          
+          <div class="info-row">
+            <span class="label">📅 Criada em:</span>
+            <span>{{ formatarData(unidade.dataCriacao) }}</span>
+          </div>
+          
+          <div *ngIf="unidade.observacoes" class="info-row">
+            <span class="label">📝 Observações:</span>
+            <span>{{ unidade.observacoes }}</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Estado vazio -->
+    <div *ngIf="unidadesFiltradas.length === 0" class="empty-state">
+      <div class="empty-icon">🏢</div>
+      <h3>Nenhuma unidade encontrada</h3>
+      <p>Não há unidades que correspondam aos filtros aplicados.</p>
+      <button class="btn-primary" (click)="novaUnidade()">
+        Criar primeira unidade
+      </button>
+    </div>
+
+  </div>
+</div>

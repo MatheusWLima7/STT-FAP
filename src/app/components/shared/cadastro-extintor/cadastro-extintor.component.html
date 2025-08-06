@@ -1,0 +1,227 @@
+<div class="cadastro-extintor">
+  <div class="page-header">
+    <h1>{{ isEditMode ? 'Editar Extintor' : 'Novo Extintor' }}</h1>
+    <div class="header-actions">
+      <button *ngIf="isEditMode" class="btn-warning" (click)="gerarQRCode()">
+        📱 Gerar QR Code
+      </button>
+      <button class="btn-secondary" (click)="cancelar()">
+        ← Voltar
+      </button>
+    </div>
+  </div>
+
+  <!-- Mensagens -->
+  <div *ngIf="error" class="alert alert-error">
+    {{ error }}
+  </div>
+
+  <div *ngIf="success" class="alert alert-success">
+    {{ success }}
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading-overlay">
+    <div class="spinner"></div>
+    <p>{{ isEditMode ? 'Carregando dados...' : 'Salvando extintor...' }}</p>
+  </div>
+
+  <!-- Formulário -->
+  <form [formGroup]="extintorForm" (ngSubmit)="onSubmit()" class="extintor-form">
+    
+    <!-- Identificação -->
+    <div class="form-section">
+      <h3>Identificação</h3>
+      <div class="form-grid">
+        
+        <div class="form-group">
+          <label for="codigo">Código do Extintor *</label>
+          <input type="text" 
+                 id="codigo" 
+                 formControlName="codigo"
+                 [class.invalid]="isFieldInvalid('codigo')"
+                 placeholder="Ex: EXT-001">
+          <div *ngIf="isFieldInvalid('codigo')" class="field-error">
+            {{ getFieldError('codigo') }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="tipo">Tipo de Extintor *</label>
+          <select id="tipo" 
+                  formControlName="tipo"
+                  [class.invalid]="isFieldInvalid('tipo')">
+            <option *ngFor="let tipo of tiposExtintor" [value]="tipo.value">
+              {{ tipo.label }}
+            </option>
+          </select>
+          <div *ngIf="isFieldInvalid('tipo')" class="field-error">
+            {{ getFieldError('tipo') }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="capacidade">Capacidade (kg/L) *</label>
+          <input type="number" 
+                 id="capacidade" 
+                 formControlName="capacidade"
+                 [class.invalid]="isFieldInvalid('capacidade')"
+                 placeholder="Ex: 6"
+                 step="0.1"
+                 min="0.1"
+                 max="100">
+          <div *ngIf="isFieldInvalid('capacidade')" class="field-error">
+            {{ getFieldError('capacidade') }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="fabricante">Fabricante *</label>
+          <input type="text" 
+                 id="fabricante" 
+                 formControlName="fabricante"
+                 [class.invalid]="isFieldInvalid('fabricante')"
+                 placeholder="Nome do fabricante">
+          <div *ngIf="isFieldInvalid('fabricante')" class="field-error">
+            {{ getFieldError('fabricante') }}
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Datas -->
+    <div class="form-section">
+      <h3>Datas Importantes</h3>
+      <div class="form-grid">
+        
+        <div class="form-group">
+          <label for="dataFabricacao">Data de Fabricação *</label>
+          <input type="date" 
+                 id="dataFabricacao" 
+                 formControlName="dataFabricacao"
+                 [class.invalid]="isFieldInvalid('dataFabricacao')">
+          <div *ngIf="isFieldInvalid('dataFabricacao')" class="field-error">
+            {{ getFieldError('dataFabricacao') }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="dataVencimento">Data de Vencimento *</label>
+          <input type="date" 
+                 id="dataVencimento" 
+                 formControlName="dataVencimento"
+                 [class.invalid]="isFieldInvalid('dataVencimento')"
+                 (change)="calcularProximaInspecao()">
+          <div *ngIf="isFieldInvalid('dataVencimento')" class="field-error">
+            {{ getFieldError('dataVencimento') }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="proximaInspecao">Próxima Inspeção</label>
+          <input type="date" 
+                 id="proximaInspecao" 
+                 formControlName="proximaInspecao">
+          <small>Calculada automaticamente baseada no vencimento</small>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Localização -->
+    <div class="form-section">
+      <h3>Localização</h3>
+      <div class="form-grid">
+        
+        <div class="form-group">
+          <label for="unidadeId">Unidade *</label>
+          <select id="unidadeId" 
+                  formControlName="unidadeId"
+                  [class.invalid]="isFieldInvalid('unidadeId')">
+            <option value="">Selecione a unidade</option>
+            <option *ngFor="let unidade of unidadesDisponiveis" [value]="unidade.id">
+              {{ unidade.nome }}
+            </option>
+          </select>
+          <div *ngIf="isFieldInvalid('unidadeId')" class="field-error">
+            {{ getFieldError('unidadeId') }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="localizacao">Localização Específica *</label>
+          <input type="text" 
+                 id="localizacao" 
+                 formControlName="localizacao"
+                 [class.invalid]="isFieldInvalid('localizacao')"
+                 placeholder="Ex: Corredor A, próximo ao elevador">
+          <div *ngIf="isFieldInvalid('localizacao')" class="field-error">
+            {{ getFieldError('localizacao') }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="status">Status *</label>
+          <select id="status" 
+                  formControlName="status"
+                  [class.invalid]="isFieldInvalid('status')">
+            <option *ngFor="let status of statusOptions" [value]="status.value">
+              {{ status.label }}
+            </option>
+          </select>
+          <div *ngIf="isFieldInvalid('status')" class="field-error">
+            {{ getFieldError('status') }}
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Observações -->
+    <div class="form-section">
+      <h3>Observações</h3>
+      <div class="form-group">
+        <label for="observacoes">Observações Adicionais</label>
+        <textarea id="observacoes" 
+                  formControlName="observacoes"
+                  rows="4"
+                  placeholder="Informações adicionais sobre o extintor..."
+                  maxlength="500"></textarea>
+        <small>{{ extintorForm.get('observacoes')?.value?.length || 0 }}/500 caracteres</small>
+      </div>
+    </div>
+
+    <!-- Ações do Formulário -->
+    <div class="form-actions">
+      <div class="actions-left">
+      </div>
+      
+      <div class="actions-right">
+        <button type="button" 
+                class="btn-secondary" 
+                (click)="cancelar()">
+          Cancelar
+        </button>
+        <button type="submit" 
+                class="btn-primary"
+                [disabled]="extintorForm.invalid || loading">
+          {{ isEditMode ? 'Atualizar' : 'Criar' }} Extintor
+        </button>
+      </div>
+    </div>
+
+  </form>
+
+  <!-- Informações Adicionais -->
+  <div *ngIf="!isEditMode" class="info-box">
+    <h4>ℹ️ Informações Importantes</h4>
+    <ul>
+      <li>O código do extintor deve ser único no sistema</li>
+      <li>A próxima inspeção é calculada automaticamente</li>
+      <li>Um QR Code será gerado após a criação</li>
+      <li>Alertas automáticos serão configurados para vencimentos</li>
+    </ul>
+  </div>
+
+</div>

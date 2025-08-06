@@ -1,0 +1,193 @@
+<div class="cadastro-unidade">
+  <div class="page-header">
+    <h1>{{ isEditMode ? 'Editar Unidade' : 'Nova Unidade' }}</h1>
+    <div class="header-actions">
+      <button class="btn-secondary" (click)="cancelar()">
+        ← Voltar
+      </button>
+    </div>
+  </div>
+
+  <!-- Mensagens -->
+  <div *ngIf="error" class="alert alert-error">
+    {{ error }}
+  </div>
+
+  <div *ngIf="success" class="alert alert-success">
+    {{ success }}
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading-overlay">
+    <div class="spinner"></div>
+    <p>{{ isEditMode ? 'Carregando dados...' : 'Salvando unidade...' }}</p>
+  </div>
+
+  <!-- Formulário -->
+  <form [formGroup]="unidadeForm" (ngSubmit)="onSubmit()" class="unidade-form">
+    
+    <!-- Informações Básicas -->
+    <div class="form-section">
+      <h3>Informações Básicas</h3>
+      <div class="form-grid">
+        
+        <div class="form-group">
+          <label for="nome">Nome da Unidade *</label>
+          <input type="text" 
+                 id="nome" 
+                 formControlName="nome"
+                 [class.invalid]="isFieldInvalid('nome')"
+                 placeholder="Digite o nome da unidade">
+          <div *ngIf="isFieldInvalid('nome')" class="field-error">
+            {{ getFieldError('nome') }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="tipo">Tipo de Unidade *</label>
+          <select id="tipo" 
+                  formControlName="tipo"
+                  [class.invalid]="isFieldInvalid('tipo')">
+            <option *ngFor="let tipo of tiposUnidade" [value]="tipo.value">
+              {{ tipo.label }}
+            </option>
+          </select>
+          <div *ngIf="isFieldInvalid('tipo')" class="field-error">
+            {{ getFieldError('tipo') }}
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Endereço -->
+    <div class="form-section">
+      <h3>Endereço</h3>
+      <div class="form-grid">
+        
+        <div class="form-group full-width">
+          <label for="endereco">Endereço Completo *</label>
+          <input type="text" 
+                 id="endereco" 
+                 formControlName="endereco"
+                 [class.invalid]="isFieldInvalid('endereco')"
+                 placeholder="Rua, número, bairro">
+          <div *ngIf="isFieldInvalid('endereco')" class="field-error">
+            {{ getFieldError('endereco') }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="cidade">Cidade *</label>
+          <input type="text" 
+                 id="cidade" 
+                 formControlName="cidade"
+                 [class.invalid]="isFieldInvalid('cidade')"
+                 placeholder="Nome da cidade">
+          <div *ngIf="isFieldInvalid('cidade')" class="field-error">
+            {{ getFieldError('cidade') }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="estado">Estado *</label>
+          <select id="estado" 
+                  formControlName="estado"
+                  [class.invalid]="isFieldInvalid('estado')">
+            <option value="">Selecione o estado</option>
+            <option *ngFor="let estado of estados" [value]="estado">
+              {{ estado }}
+            </option>
+          </select>
+          <div *ngIf="isFieldInvalid('estado')" class="field-error">
+            {{ getFieldError('estado') }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="cep">CEP *</label>
+          <input type="text" 
+                 id="cep" 
+                 formControlName="cep"
+                 [class.invalid]="isFieldInvalid('cep')"
+                 placeholder="00000-000"
+                 maxlength="9"
+                 (input)="formatarCEP($event)">
+          <div *ngIf="isFieldInvalid('cep')" class="field-error">
+            {{ getFieldError('cep') }}
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Contato -->
+    <div class="form-section">
+      <h3>Informações de Contato</h3>
+      <div class="form-grid">
+        
+        <div class="form-group">
+          <label for="telefone">Telefone *</label>
+          <input type="text" 
+                 id="telefone" 
+                 formControlName="telefone"
+                 [class.invalid]="isFieldInvalid('telefone')"
+                 placeholder="(11) 99999-9999"
+                 maxlength="15"
+                 (input)="formatarTelefone($event)">
+          <div *ngIf="isFieldInvalid('telefone')" class="field-error">
+            {{ getFieldError('telefone') }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="email">E-mail *</label>
+          <input type="email" 
+                 id="email" 
+                 formControlName="email"
+                 [class.invalid]="isFieldInvalid('email')"
+                 placeholder="unidade@empresa.com">
+          <div *ngIf="isFieldInvalid('email')" class="field-error">
+            {{ getFieldError('email') }}
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Observações -->
+    <div class="form-section">
+      <h3>Observações</h3>
+      <div class="form-group">
+        <label for="observacoes">Observações Adicionais</label>
+        <textarea id="observacoes" 
+                  formControlName="observacoes"
+                  rows="4"
+                  placeholder="Informações adicionais sobre a unidade..."
+                  maxlength="500"></textarea>
+        <small>{{ unidadeForm.get('observacoes')?.value?.length || 0 }}/500 caracteres</small>
+      </div>
+    </div>
+
+    <!-- Ações do Formulário -->
+    <div class="form-actions">
+      <div class="actions-left">
+      </div>
+      
+      <div class="actions-right">
+        <button type="button" 
+                class="btn-secondary" 
+                (click)="cancelar()">
+          Cancelar
+        </button>
+        <button type="submit" 
+                class="btn-primary"
+                [disabled]="unidadeForm.invalid || loading">
+          {{ isEditMode ? 'Atualizar' : 'Criar' }} Unidade
+        </button>
+      </div>
+    </div>
+
+  </form>
+
+</div>
