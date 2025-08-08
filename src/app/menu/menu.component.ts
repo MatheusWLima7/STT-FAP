@@ -1,1 +1,39 @@
-{"code":"rate-limited","message":"You have hit the rate limit. Please upgrade to keep chatting.","providerLimitHit":false,"isRetryable":true}
+import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Router, RouterModule } from '@angular/router';
+import { AuthService } from '../services/auth.service';
+
+@Component({
+  selector: 'app-menu',
+  standalone: true,
+  imports: [CommonModule, RouterModule],
+  templateUrl: './menu.component.html',
+  styleUrl: './menu.component.css'
+})
+export class MenuComponent {
+  
+  constructor(
+    private authService: AuthService,
+    private router: Router
+  ) {}
+
+  isAdmin(): boolean {
+    return this.authService.isAdmin();
+  }
+
+  isTecnico(): boolean {
+    return this.authService.isTecnico();
+  }
+
+  logout() {
+    if (confirm('Deseja realmente sair do sistema?')) {
+      this.authService.logout();
+      this.router.navigate(['/login']);
+    }
+  }
+
+  getUserName(): string {
+    const user = this.authService.currentUserValue;
+    return user ? user.nome : '';
+  }
+}

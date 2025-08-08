@@ -1,0 +1,158 @@
+.container-geral {
+    width: 100%;
+    height: 100vh;
+    background-image: url('/assets/imagens-login/gestodeseguranaesade.jpg');
+    background-size: cover;
+    background-position: center;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.logo {
+    width: 25%;
+    height: 60%;
+    background-color: #e9e8e6;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.login {
+    width: 25%;
+    height: 60%;
+    background-color: #e9e8e6;
+    
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    justify-content: center;
+}
+  
+.login h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #2c3e50;
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+
+.form {
+  width: 80%;
+}
+
+.form-group {
+  margin-bottom: 15px;
+  display: flex;
+  flex-direction: column;
+}
+
+label {
+  margin-bottom: 5px;
+  font-weight: 600;
+  color: #495057;
+}
+
+input {
+  padding: 12px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 1rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+}
+
+button {
+  width: 100%;
+  padding: 12px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.2s;
+  margin-bottom: 15px;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+button:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+}
+
+.alert-error {
+  background-color: #f8d7da;
+  color: #721c24;
+  padding: 12px;
+  border-radius: 4px;
+  margin-bottom: 15px;
+  border: 1px solid #f5c6cb;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.login-links {
+  text-align: center;
+}
+
+.link-reset {
+  color: #007bff;
+  text-decoration: none;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.link-reset:hover {
+  color: #0056b3;
+  text-decoration: underline;
+}
+
+.stt {
+    color: #dc3545;
+    font-weight: bold;
+    font-size: 4rem;
+    margin: 0;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+@media (max-width: 768px) {
+  .container-geral {
+    flex-direction: column;
+    padding: 20px;
+  }
+  
+  .logo, .login {
+    width: 100%;
+    max-width: 400px;
+    height: auto;
+    min-height: 200px;
+    margin-bottom: 20px;
+  }
+  
+  .stt {
+    font-size: 3rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .form {
+    width: 90%;
+  }
+  
+  .stt {
+    font-size: 2.5rem;
+  }
+}

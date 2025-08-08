@@ -1,0 +1,158 @@
+<div class="lista-extintores">
+  <div class="page-header">
+    <h1>Gestão de Extintores</h1>
+    <div class="header-actions">
+      <button class="btn-primary" (click)="novoExtintor()">
+        + Novo Extintor
+      </button>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="filtros-container">
+    <div class="filtros-row">
+      <div class="filtro-grupo">
+        <label>Código:</label>
+        <input type="text" 
+               [(ngModel)]="filtroCodigo" 
+               (input)="aplicarFiltros()"
+               placeholder="Buscar por código..."
+               class="input-filtro">
+      </div>
+      
+      <div class="filtro-grupo">
+        <label>Tipo:</label>
+        <select [(ngModel)]="filtroTipo" 
+                (change)="aplicarFiltros()"
+                class="select-filtro">
+          <option *ngFor="let tipo of tiposExtintor" [value]="tipo.value">
+            {{ tipo.label }}
+          </option>
+        </select>
+      </div>
+      
+      <div class="filtro-grupo">
+        <label>Status:</label>
+        <select [(ngModel)]="filtroStatus" 
+                (change)="aplicarFiltros()"
+                class="select-filtro">
+          <option *ngFor="let status of statusOptions" [value]="status.value">
+            {{ status.label }}
+          </option>
+        </select>
+      </div>
+      
+      <div class="filtro-acoes">
+        <button class="btn-limpar" (click)="limparFiltros()">Limpar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading-container">
+    <div class="spinner"></div>
+    <p>Carregando extintores...</p>
+  </div>
+
+  <!-- Erro -->
+  <div *ngIf="error" class="erro-container">
+    <p>{{ error }}</p>
+    <button (click)="carregarExtintores()">Tentar novamente</button>
+  </div>
+
+  <!-- Lista de Extintores -->
+  <div *ngIf="!loading && !error" class="extintores-container">
+    
+    <div class="resultados-info">
+      <p>{{ extintoresFiltrados.length }} extintor(es) encontrado(s)</p>
+    </div>
+
+    <div class="extintores-grid">
+      <div *ngFor="let extintor of extintoresFiltrados" class="extintor-card">
+        
+        <div class="card-header">
+          <div class="extintor-info">
+            <h3>{{ extintor.codigo }}</h3>
+            <div class="badges">
+              <span class="badge" [ngClass]="obterClasseTipo(extintor.tipo)">
+                {{ extintor.tipo }}
+              </span>
+              <span class="badge" [ngClass]="obterClasseStatus(extintor.status)">
+                {{ extintor.status }}
+              </span>
+              <span class="badge vencimento" [ngClass]="verificarVencimento(extintor.dataVencimento)">
+                {{ verificarVencimento(extintor.dataVencimento) === 'vencido' ? 'VENCIDO' : 
+                   verificarVencimento(extintor.dataVencimento) === 'vencendo' ? 'VENCENDO' : 'OK' }}
+              </span>
+            </div>
+          </div>
+          <div class="card-actions">
+            <button class="btn-icon" (click)="editarExtintor(extintor.id)" title="Editar">
+              ✏️
+            </button>
+            <button class="btn-icon" (click)="realizarInspecao(extintor)" title="Realizar Inspeção">
+              🔍
+            </button>
+            <button class="btn-icon" (click)="gerarQRCode(extintor)" title="Gerar QR Code">
+              📱
+            </button>
+            <button class="btn-icon" (click)="verHistorico(extintor)" title="Ver Histórico">
+              📋
+            </button>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <div class="info-row">
+            <span class="label">🏭 Fabricante:</span>
+            <span>{{ extintor.fabricante }}</span>
+          </div>
+          
+          <div class="info-row">
+            <span class="label">⚖️ Capacidade:</span>
+            <span>{{ extintor.capacidade }} kg/L</span>
+          </div>
+          
+          <div class="info-row">
+            <span class="label">📍 Localização:</span>
+            <span>{{ extintor.localizacao }}</span>
+          </div>
+          
+          <div class="info-row">
+            <span class="label">📅 Fabricação:</span>
+            <span>{{ formatarData(extintor.dataFabricacao) }}</span>
+          </div>
+          
+          <div class="info-row">
+            <span class="label">⏰ Vencimento:</span>
+            <span [ngClass]="verificarVencimento(extintor.dataVencimento)">
+              {{ formatarData(extintor.dataVencimento) }}
+            </span>
+          </div>
+          
+          <div *ngIf="extintor.proximaInspecao" class="info-row">
+            <span class="label">🔍 Próxima Inspeção:</span>
+            <span>{{ formatarData(extintor.proximaInspecao) }}</span>
+          </div>
+          
+          <div *ngIf="extintor.ultimaInspecao" class="info-row">
+            <span class="label">✅ Última Inspeção:</span>
+            <span>{{ formatarData(extintor.ultimaInspecao) }}</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Estado vazio -->
+    <div *ngIf="extintoresFiltrados.length === 0" class="empty-state">
+      <div class="empty-icon">🧯</div>
+      <h3>Nenhum extintor encontrado</h3>
+      <p>Não há extintores que correspondam aos filtros aplicados.</p>
+      <button class="btn-primary" (click)="novoExtintor()">
+        Cadastrar primeiro extintor
+      </button>
+    </div>
+
+  </div>
+</div>

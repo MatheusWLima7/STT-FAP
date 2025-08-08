@@ -1,0 +1,154 @@
+<div class="lista-usuarios">
+  <div class="page-header">
+    <h1>Gestão de Usuários</h1>
+    <div class="header-actions">
+      <button class="btn-primary" (click)="novoUsuario()">
+        + Novo Usuário
+      </button>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="filtros-container">
+    <div class="filtros-row">
+      <div class="filtro-grupo">
+        <label>Nome:</label>
+        <input type="text" 
+               [(ngModel)]="filtroNome" 
+               (input)="aplicarFiltros()"
+               placeholder="Buscar por nome..."
+               class="input-filtro">
+      </div>
+      
+      <div class="filtro-grupo">
+        <label>Tipo:</label>
+        <select [(ngModel)]="filtroTipo" 
+                (change)="aplicarFiltros()"
+                class="select-filtro">
+          <option *ngFor="let tipo of tiposUsuario" [value]="tipo.value">
+            {{ tipo.label }}
+          </option>
+        </select>
+      </div>
+      
+      <div class="filtro-grupo">
+        <label>Status:</label>
+        <select [(ngModel)]="filtroStatus" 
+                (change)="aplicarFiltros()"
+                class="select-filtro">
+          <option *ngFor="let status of statusOptions" [value]="status.value">
+            {{ status.label }}
+          </option>
+        </select>
+      </div>
+      
+      <div class="filtro-acoes">
+        <button class="btn-limpar" (click)="limparFiltros()">Limpar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading-container">
+    <div class="spinner"></div>
+    <p>Carregando usuários...</p>
+  </div>
+
+  <!-- Erro -->
+  <div *ngIf="error" class="erro-container">
+    <p>{{ error }}</p>
+    <button (click)="carregarUsuarios()">Tentar novamente</button>
+  </div>
+
+  <!-- Lista de Usuários -->
+  <div *ngIf="!loading && !error" class="usuarios-container">
+    
+    <div class="resultados-info">
+      <p>{{ usuariosFiltrados.length }} usuário(s) encontrado(s)</p>
+    </div>
+
+    <div class="usuarios-grid">
+      <div *ngFor="let usuario of usuariosFiltrados" class="usuario-card">
+        
+        <div class="card-header">
+          <div class="usuario-info">
+            <div class="foto-usuario">
+              <img *ngIf="usuario.foto" [src]="usuario.foto" [alt]="usuario.nome">
+              <div *ngIf="!usuario.foto" class="foto-placeholder">
+                {{ usuario.nome.charAt(0).toUpperCase() }}
+              </div>
+            </div>
+            <div class="info-basica">
+              <h3>{{ usuario.nome }}</h3>
+              <p>{{ usuario.email }}</p>
+              <div class="badges">
+                <span class="badge" [ngClass]="obterClasseTipo(usuario.tipoUsuario)">
+                  {{ usuario.tipoUsuario }}
+                </span>
+                <span class="badge" [ngClass]="obterClasseStatus(usuario.status)">
+                  {{ usuario.status }}
+                </span>
+              </div>
+            </div>
+          </div>
+          <div class="card-actions">
+            <button class="btn-icon" (click)="editarUsuario(usuario.id)" title="Editar">
+              ✏️
+            </button>
+            <button class="btn-icon" (click)="alterarStatus(usuario)" 
+                    [title]="usuario.status === 'ATIVO' ? 'Desativar' : 'Ativar'">
+              {{ usuario.status === 'ATIVO' ? '⏸️' : '▶️' }}
+            </button>
+            <button class="btn-icon" (click)="resetarSenha(usuario)" title="Resetar Senha">
+              🔑
+            </button>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <div class="info-row">
+            <span class="label">📱 Telefone:</span>
+            <span>{{ usuario.telefone }}</span>
+          </div>
+          
+          <div class="info-row">
+            <span class="label">🆔 CPF:</span>
+            <span>{{ usuario.cpf }}</span>
+          </div>
+          
+          <div *ngIf="usuario.cargo" class="info-row">
+            <span class="label">💼 Cargo:</span>
+            <span>{{ usuario.cargo }}</span>
+          </div>
+          
+          <div *ngIf="usuario.dataAdmissao" class="info-row">
+            <span class="label">📅 Admissão:</span>
+            <span>{{ formatarData(usuario.dataAdmissao) }}</span>
+          </div>
+          
+          <div class="info-row">
+            <span class="label">📅 Criado em:</span>
+            <span>{{ formatarData(usuario.dataCriacao) }}</span>
+          </div>
+          
+          <div *ngIf="usuario.dataUltimoLogin" class="info-row">
+            <span class="label">🕐 Último login:</span>
+            <span>{{ formatarData(usuario.dataUltimoLogin) }}</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Estado vazio -->
+    <div *ngIf="usuariosFiltrados.length === 0" class="empty-state">
+      <div class="empty-icon">👥</div>
+      <h3>Nenhum usuário encontrado</h3>
+      <p>Não há usuários que correspondam aos filtros aplicados.</p>
+      <button class="btn-primary" (click)="novoUsuario()">
+        Criar primeiro usuário
+      </button>
+    </div>
+
+  </div>
+</div>

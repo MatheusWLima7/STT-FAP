@@ -1,0 +1,41 @@
+<div class="container-geral">
+    <div class="logo">
+        <p class="stt">STT FAP</p>
+    </div>
+    <div class="login">
+        <h2>Login</h2>
+        
+        <div *ngIf="error" class="alert-error">
+            {{ error }}
+        </div>
+      
+        <form class="form" (ngSubmit)="onSubmit()" #loginForm="ngForm">
+          <div class="form-group">
+            <label for="email">E-mail:</label>
+            <input type="email" 
+                   id="email" 
+                   name="email" 
+                   [(ngModel)]="email"
+                   required />
+          </div>
+      
+          <div class="form-group">
+            <label for="senha">Senha:</label>
+            <input type="password" 
+                   id="senha" 
+                   name="senha" 
+                   [(ngModel)]="senha"
+                   required />
+          </div>
+      
+          <button type="submit" [disabled]="loading">
+            {{ loading ? 'Entrando...' : 'Entrar' }}
+          </button>
+
+          <div class="login-links">
+            <a (click)="resetSenha()" class="link-reset">Esqueci minha senha</a>
+          </div>
+        </form>
+      </div>
+      
+</div>
