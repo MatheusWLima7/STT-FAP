@@ -1,0 +1,349 @@
+<div class="configuracoes">
+  <div class="page-header">
+    <h1>Configurações do Sistema</h1>
+    <div class="header-actions">
+      <button class="btn-secondary" (click)="voltar()">
+        ← Voltar
+      </button>
+    </div>
+  </div>
+
+  <!-- Mensagens -->
+  <div *ngIf="error" class="alert alert-error">
+    {{ error }}
+  </div>
+
+  <div *ngIf="success" class="alert alert-success">
+    {{ success }}
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading-overlay">
+    <div class="spinner"></div>
+    <p>Processando...</p>
+  </div>
+
+  <div class="configuracoes-container">
+    
+    <!-- Abas -->
+    <div class="tabs-container">
+      <button class="tab-button" 
+              [class.active]="abaSelecionada === 'geral'"
+              (click)="selecionarAba('geral')">
+        🏢 Geral
+      </button>
+      <button class="tab-button" 
+              [class.active]="abaSelecionada === 'inspecoes'"
+              (click)="selecionarAba('inspecoes')">
+        🔍 Inspeções
+      </button>
+      <button class="tab-button" 
+              [class.active]="abaSelecionada === 'notificacoes'"
+              (click)="selecionarAba('notificacoes')">
+        📧 Notificações
+      </button>
+      <button class="tab-button" 
+              [class.active]="abaSelecionada === 'relatorios'"
+              (click)="selecionarAba('relatorios')">
+        📊 Relatórios
+      </button>
+      <button class="tab-button" 
+              [class.active]="abaSelecionada === 'backup'"
+              (click)="selecionarAba('backup')">
+        💾 Backup
+      </button>
+    </div>
+
+    <!-- Formulário -->
+    <form [formGroup]="configForm" (ngSubmit)="onSubmit()" class="config-form">
+      
+      <!-- Aba Geral -->
+      <div *ngIf="abaSelecionada === 'geral'" class="tab-content">
+        <h3>Informações da Empresa</h3>
+        <div class="form-grid">
+          
+          <div class="form-group">
+            <label for="nomeEmpresa">Nome da Empresa *</label>
+            <input type="text" 
+                   id="nomeEmpresa" 
+                   formControlName="nomeEmpresa"
+                   [class.invalid]="isFieldInvalid('nomeEmpresa')"
+                   placeholder="Nome da empresa">
+            <div *ngIf="isFieldInvalid('nomeEmpresa')" class="field-error">
+              {{ getFieldError('nomeEmpresa') }}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="cnpj">CNPJ *</label>
+            <input type="text" 
+                   id="cnpj" 
+                   formControlName="cnpj"
+                   [class.invalid]="isFieldInvalid('cnpj')"
+                   placeholder="00.000.000/0000-00"
+                   maxlength="18"
+                   (input)="formatarCNPJ($event)">
+            <div *ngIf="isFieldInvalid('cnpj')" class="field-error">
+              {{ getFieldError('cnpj') }}
+            </div>
+          </div>
+
+          <div class="form-group full-width">
+            <label for="endereco">Endereço *</label>
+            <input type="text" 
+                   id="endereco" 
+                   formControlName="endereco"
+                   [class.invalid]="isFieldInvalid('endereco')"
+                   placeholder="Endereço completo">
+            <div *ngIf="isFieldInvalid('endereco')" class="field-error">
+              {{ getFieldError('endereco') }}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="telefone">Telefone *</label>
+            <input type="text" 
+                   id="telefone" 
+                   formControlName="telefone"
+                   [class.invalid]="isFieldInvalid('telefone')"
+                   placeholder="(11) 99999-9999"
+                   maxlength="15"
+                   (input)="formatarTelefone($event)">
+            <div *ngIf="isFieldInvalid('telefone')" class="field-error">
+              {{ getFieldError('telefone') }}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="email">E-mail *</label>
+            <input type="email" 
+                   id="email" 
+                   formControlName="email"
+                   [class.invalid]="isFieldInvalid('email')"
+                   placeholder="contato@empresa.com">
+            <div *ngIf="isFieldInvalid('email')" class="field-error">
+              {{ getFieldError('email') }}
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Aba Inspeções -->
+      <div *ngIf="abaSelecionada === 'inspecoes'" class="tab-content">
+        <h3>Configurações de Inspeção</h3>
+        <div class="form-grid">
+          
+          <div class="form-group">
+            <label for="diasAntecedenciaInspecao">Dias de Antecedência para Notificar *</label>
+            <input type="number" 
+                   id="diasAntecedenciaInspecao" 
+                   formControlName="diasAntecedenciaInspecao"
+                   [class.invalid]="isFieldInvalid('diasAntecedenciaInspecao')"
+                   min="1" max="365">
+            <small>Quantos dias antes da inspeção notificar</small>
+            <div *ngIf="isFieldInvalid('diasAntecedenciaInspecao')" class="field-error">
+              {{ getFieldError('diasAntecedenciaInspecao') }}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="diasToleranciaAtraso">Dias de Tolerância para Atraso *</label>
+            <input type="number" 
+                   id="diasToleranciaAtraso" 
+                   formControlName="diasToleranciaAtraso"
+                   [class.invalid]="isFieldInvalid('diasToleranciaAtraso')"
+                   min="0" max="30">
+            <small>Quantos dias após o vencimento considerar atrasado</small>
+            <div *ngIf="isFieldInvalid('diasToleranciaAtraso')" class="field-error">
+              {{ getFieldError('diasToleranciaAtraso') }}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="validadeInspecaoMeses">Validade da Inspeção (meses) *</label>
+            <input type="number" 
+                   id="validadeInspecaoMeses" 
+                   formControlName="validadeInspecaoMeses"
+                   [class.invalid]="isFieldInvalid('validadeInspecaoMeses')"
+                   min="1" max="60">
+            <small>Período de validade de uma inspeção</small>
+            <div *ngIf="isFieldInvalid('validadeInspecaoMeses')" class="field-error">
+              {{ getFieldError('validadeInspecaoMeses') }}
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Aba Notificações -->
+      <div *ngIf="abaSelecionada === 'notificacoes'" class="tab-content">
+        <h3>Configurações de Notificação</h3>
+        
+        <div class="checkbox-section">
+          <h4>Canais de Notificação</h4>
+          <div class="checkbox-group">
+            <label class="checkbox-item">
+              <input type="checkbox" formControlName="emailNotificacoes">
+              <span>📧 Notificações por E-mail</span>
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox" formControlName="smsNotificacoes">
+              <span>📱 Notificações por SMS</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="checkbox-section">
+          <h4>Tipos de Notificação</h4>
+          <div class="checkbox-group">
+            <label class="checkbox-item">
+              <input type="checkbox" formControlName="notificarVencimento">
+              <span>⏰ Vencimentos de Extintores</span>
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox" formControlName="notificarInspecoesPendentes">
+              <span>🔍 Inspeções Pendentes</span>
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox" formControlName="notificarServicosAtrasados">
+              <span>⚠️ Serviços Atrasados</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="test-section">
+          <button type="button" class="btn-test" (click)="testarNotificacoes()">
+            🧪 Testar Notificações
+          </button>
+          <small>Enviar notificações de teste para verificar configuração</small>
+        </div>
+      </div>
+
+      <!-- Aba Relatórios -->
+      <div *ngIf="abaSelecionada === 'relatorios'" class="tab-content">
+        <h3>Configurações de Relatórios</h3>
+        <div class="form-grid">
+          
+          <div class="form-group">
+            <label for="logoEmpresa">Logo da Empresa</label>
+            <input type="file" 
+                   #logoInput
+                   accept="image/*"
+                   (change)="onLogoSelected($event)"
+                   style="display: none">
+            <button type="button" 
+                    class="btn-upload" 
+                    (click)="logoInput.click()">
+              📷 Selecionar Logo
+            </button>
+            <small *ngIf="configForm.get('logoEmpresa')?.value">
+              Arquivo: {{ configForm.get('logoEmpresa')?.value }}
+            </small>
+            <small>Máximo 2MB - JPG, PNG ou GIF</small>
+          </div>
+
+          <div class="form-group">
+            <label for="formatoPadraoRelatorio">Formato Padrão *</label>
+            <select id="formatoPadraoRelatorio" 
+                    formControlName="formatoPadraoRelatorio"
+                    [class.invalid]="isFieldInvalid('formatoPadraoRelatorio')">
+              <option value="PDF">PDF</option>
+              <option value="EXCEL">Excel</option>
+              <option value="FIESC">FIESC</option>
+            </select>
+            <div *ngIf="isFieldInvalid('formatoPadraoRelatorio')" class="field-error">
+              {{ getFieldError('formatoPadraoRelatorio') }}
+            </div>
+          </div>
+
+          <div class="form-group full-width">
+            <div class="checkbox-group">
+              <label class="checkbox-item">
+                <input type="checkbox" formControlName="incluirAssinaturasPadrao">
+                <span>✍️ Incluir Assinaturas por Padrão</span>
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox" formControlName="incluirFotosPadrao">
+                <span>📸 Incluir Fotos por Padrão</span>
+              </label>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Aba Backup -->
+      <div *ngIf="abaSelecionada === 'backup'" class="tab-content">
+        <h3>Configurações de Backup</h3>
+        <div class="form-grid">
+          
+          <div class="form-group">
+            <div class="checkbox-group">
+              <label class="checkbox-item">
+                <input type="checkbox" formControlName="backupAutomatico">
+                <span>🤖 Backup Automático</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="frequenciaBackup">Frequência do Backup *</label>
+            <select id="frequenciaBackup" 
+                    formControlName="frequenciaBackup"
+                    [class.invalid]="isFieldInvalid('frequenciaBackup')">
+              <option value="DIARIO">Diário</option>
+              <option value="SEMANAL">Semanal</option>
+              <option value="MENSAL">Mensal</option>
+            </select>
+            <div *ngIf="isFieldInvalid('frequenciaBackup')" class="field-error">
+              {{ getFieldError('frequenciaBackup') }}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="manterBackupsDias">Manter Backups por (dias) *</label>
+            <input type="number" 
+                   id="manterBackupsDias" 
+                   formControlName="manterBackupsDias"
+                   [class.invalid]="isFieldInvalid('manterBackupsDias')"
+                   min="7" max="365">
+            <small>Quantos dias manter os backups antes de excluir</small>
+            <div *ngIf="isFieldInvalid('manterBackupsDias')" class="field-error">
+              {{ getFieldError('manterBackupsDias') }}
+            </div>
+          </div>
+
+        </div>
+
+        <div class="backup-section">
+          <button type="button" class="btn-backup" (click)="executarBackup()">
+            💾 Executar Backup Agora
+          </button>
+          <small>Executar backup manual imediatamente</small>
+        </div>
+      </div>
+
+      <!-- Ações do Formulário -->
+      <div class="form-actions">
+        <div class="actions-left">
+        </div>
+        
+        <div class="actions-right">
+          <button type="button" 
+                  class="btn-secondary" 
+                  (click)="voltar()">
+            Cancelar
+          </button>
+          <button type="submit" 
+                  class="btn-primary"
+                  [disabled]="configForm.invalid || loading">
+            💾 Salvar Configurações
+          </button>
+        </div>
+      </div>
+
+    </form>
+
+  </div>
+</div>

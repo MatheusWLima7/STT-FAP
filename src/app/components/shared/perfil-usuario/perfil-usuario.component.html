@@ -1,0 +1,247 @@
+<div class="perfil-usuario">
+  <div class="page-header">
+    <h1>Meu Perfil</h1>
+    <div class="header-actions">
+      <button class="btn-secondary" (click)="voltar()">
+        ← Voltar
+      </button>
+      <button class="btn-danger" (click)="logout()">
+        🚪 Sair
+      </button>
+    </div>
+  </div>
+
+  <!-- Mensagens -->
+  <div *ngIf="error" class="alert alert-error">
+    {{ error }}
+  </div>
+
+  <div *ngIf="success" class="alert alert-success">
+    {{ success }}
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading-overlay">
+    <div class="spinner"></div>
+    <p>Processando...</p>
+  </div>
+
+  <div class="perfil-container">
+    
+    <!-- Informações do Usuário -->
+    <div class="user-info-card">
+      <div class="user-avatar">
+        <img *ngIf="previewFoto" [src]="previewFoto" [alt]="currentUser?.nome">
+        <div *ngIf="!previewFoto" class="avatar-placeholder">
+          {{ obterIniciais(currentUser?.nome || '') }}
+        </div>
+      </div>
+      <div class="user-details">
+        <h2>{{ currentUser?.nome }}</h2>
+        <p class="user-email">{{ currentUser?.email }}</p>
+        <div class="user-badges">
+          <span class="badge" [ngClass]="currentUser?.tipoUsuario === 'ADMIN' ? 'badge-admin' : 'badge-tecnico'">
+            {{ currentUser?.tipoUsuario === 'ADMIN' ? 'Administrador' : 'Técnico' }}
+          </span>
+          <span class="badge badge-status">{{ currentUser?.status }}</span>
+        </div>
+        <div class="user-meta">
+          <small>Membro desde {{ formatarData(currentUser?.dataCriacao!) }}</small>
+          <small *ngIf="currentUser?.dataUltimoLogin">
+            Último login: {{ formatarData(currentUser.dataUltimoLogin) }}
+          </small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Abas -->
+    <div class="tabs-container">
+      <button class="tab-button" 
+              [class.active]="abaSelecionada === 'dados'"
+              (click)="selecionarAba('dados')">
+        👤 Dados Pessoais
+      </button>
+      <button class="tab-button" 
+              [class.active]="abaSelecionada === 'senha'"
+              (click)="selecionarAba('senha')">
+        🔒 Alterar Senha
+      </button>
+      <button class="tab-button" 
+              [class.active]="abaSelecionada === 'preferencias'"
+              (click)="selecionarAba('preferencias')">
+        ⚙️ Preferências
+      </button>
+    </div>
+
+    <!-- Aba Dados Pessoais -->
+    <div *ngIf="abaSelecionada === 'dados'" class="tab-content">
+      <form [formGroup]="perfilForm" (ngSubmit)="salvarPerfil()" class="perfil-form">
+        
+        <div class="form-section">
+          <h3>Foto do Perfil</h3>
+          <div class="foto-upload">
+            <div class="foto-preview">
+              <img *ngIf="previewFoto" [src]="previewFoto" alt="Preview da foto">
+              <div *ngIf="!previewFoto" class="no-foto">
+                <span>{{ obterIniciais(currentUser?.nome || '') }}</span>
+              </div>
+            </div>
+            <div class="foto-actions">
+              <input type="file" 
+                     #fileInput 
+                     accept="image/*" 
+                     (change)="onFotoSelecionada($event)"
+                     style="display: none">
+              <button type="button" 
+                      class="btn-upload" 
+                      (click)="fileInput.click()">
+                📷 Alterar Foto
+              </button>
+              <small>Máximo 2MB - JPG, PNG ou GIF</small>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h3>Informações Pessoais</h3>
+          <div class="form-grid">
+            
+            <div class="form-group">
+              <label for="nome">Nome Completo *</label>
+              <input type="text" 
+                     id="nome" 
+                     formControlName="nome"
+                     [class.invalid]="isFieldInvalid(perfilForm, 'nome')"
+                     placeholder="Digite seu nome completo">
+              <div *ngIf="isFieldInvalid(perfilForm, 'nome')" class="field-error">
+                {{ getFieldError(perfilForm, 'nome') }}
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="email">E-mail *</label>
+              <input type="email" 
+                     id="email" 
+                     formControlName="email"
+                     [class.invalid]="isFieldInvalid(perfilForm, 'email')"
+                     placeholder="seu@email.com">
+              <div *ngIf="isFieldInvalid(perfilForm, 'email')" class="field-error">
+                {{ getFieldError(perfilForm, 'email') }}
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="telefone">Telefone *</label>
+              <input type="text" 
+                     id="telefone" 
+                     formControlName="telefone"
+                     [class.invalid]="isFieldInvalid(perfilForm, 'telefone')"
+                     placeholder="(11) 99999-9999"
+                     maxlength="15"
+                     (input)="formatarTelefone($event)">
+              <div *ngIf="isFieldInvalid(perfilForm, 'telefone')" class="field-error">
+                {{ getFieldError(perfilForm, 'telefone') }}
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="cargo">Cargo/Função</label>
+              <input type="text" 
+                     id="cargo" 
+                     formControlName="cargo"
+                     placeholder="Ex: Técnico em Segurança">
+            </div>
+
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" 
+                  class="btn-primary"
+                  [disabled]="perfilForm.invalid || loading">
+            💾 Salvar Alterações
+          </button>
+        </div>
+
+      </form>
+    </div>
+
+    <!-- Aba Alterar Senha -->
+    <div *ngIf="abaSelecionada === 'senha'" class="tab-content">
+      <form [formGroup]="senhaForm" (ngSubmit)="alterarSenha()" class="senha-form">
+        
+        <div class="form-section">
+          <h3>Alterar Senha</h3>
+          <div class="form-grid">
+            
+            <div class="form-group full-width">
+              <label for="senhaAtual">Senha Atual *</label>
+              <input type="password" 
+                     id="senhaAtual" 
+                     formControlName="senhaAtual"
+                     [class.invalid]="isFieldInvalid(senhaForm, 'senhaAtual')"
+                     placeholder="Digite sua senha atual">
+              <div *ngIf="isFieldInvalid(senhaForm, 'senhaAtual')" class="field-error">
+                {{ getFieldError(senhaForm, 'senhaAtual') }}
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="novaSenha">Nova Senha *</label>
+              <input type="password" 
+                     id="novaSenha" 
+                     formControlName="novaSenha"
+                     [class.invalid]="isFieldInvalid(senhaForm, 'novaSenha')"
+                     placeholder="Digite a nova senha">
+              <small>Mínimo 6 caracteres</small>
+              <div *ngIf="isFieldInvalid(senhaForm, 'novaSenha')" class="field-error">
+                {{ getFieldError(senhaForm, 'novaSenha') }}
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="confirmarSenha">Confirmar Nova Senha *</label>
+              <input type="password" 
+                     id="confirmarSenha" 
+                     formControlName="confirmarSenha"
+                     [class.invalid]="isFieldInvalid(senhaForm, 'confirmarSenha') || senhaForm.errors?.['senhasDiferentes']"
+                     placeholder="Confirme a nova senha">
+              <div *ngIf="isFieldInvalid(senhaForm, 'confirmarSenha') || senhaForm.errors?.['senhasDiferentes']" class="field-error">
+                {{ getFieldError(senhaForm, 'confirmarSenha') }}
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" 
+                  class="btn-primary"
+                  [disabled]="senhaForm.invalid || loading">
+            🔒 Alterar Senha
+          </button>
+        </div>
+
+      </form>
+    </div>
+
+    <!-- Aba Preferências -->
+    <div *ngIf="abaSelecionada === 'preferencias'" class="tab-content">
+      <div class="preferencias-section">
+        <h3>Preferências do Sistema</h3>
+        <p class="em-desenvolvimento">
+          🚧 Esta funcionalidade está em desenvolvimento.
+        </p>
+        <p>Em breve você poderá configurar:</p>
+        <ul>
+          <li>Notificações por email</li>
+          <li>Notificações por SMS</li>
+          <li>Tema da interface</li>
+          <li>Idioma do sistema</li>
+          <li>Formato de data e hora</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</div>

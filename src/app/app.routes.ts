@@ -6,6 +6,7 @@ import { CadastroUsuarioComponent } from './components/admin/cadastro-usuario/ca
 import { CadastroUnidadeComponent } from './components/admin/cadastro-unidade/cadastro-unidade.component';
 import { ListaUnidadesComponent } from './components/shared/lista-unidades/lista-unidades.component';
 import { CadastroExtintorComponent } from './components/shared/cadastro-extintor/cadastro-extintor.component';
+import { ListaExtintoresComponent } from './components/shared/lista-extintores/lista-extintores.component';
 import { DashboardTecnicoComponent } from './components/tecnico/dashboard-tecnico/dashboard-tecnico.component';
 import { ListaUsuariosComponent } from './components/admin/lista-usuarios/lista-usuarios.component';
 import { CadastroResponsavelComponent } from './components/admin/cadastro-responsavel/cadastro-responsavel.component';
@@ -14,12 +15,8 @@ import { CadastroServicoComponent } from './components/admin/cadastro-servico/ca
 import { ListaServicosComponent } from './components/shared/lista-servicos/lista-servicos.component';
 import { ConfiguracoesComponent } from './components/admin/configuracoes/configuracoes.component';
 import { ServicosDesignadosComponent } from './components/tecnico/servicos-designados/servicos-designados.component';
-import { ListaExtintoresComponent } from './components/shared/lista-extintores/lista-extintores.component';
 import { AgendaInspecoesComponent } from './components/shared/agenda-inspecoes/agenda-inspecoes.component';
 import { ChecklistInspecaoComponent } from './components/shared/checklist-inspecao/checklist-inspecao.component';
-import { RelatoriosComponent } from './components/shared/relatorios/relatorios.component';
-import { HistoricoInspecoesComponent } from './components/shared/historico-inspecoes/historico-inspecoes.component';
-import { DocumentosComponent } from './components/shared/documentos/documentos.component';
 import { NotificacoesComponent } from './components/shared/notificacoes/notificacoes.component';
 import { PerfilUsuarioComponent } from './components/shared/perfil-usuario/perfil-usuario.component';
 import { AjudaComponent } from './components/shared/ajuda/ajuda.component';
@@ -50,7 +47,7 @@ export const routes: Routes = [
   { path: 'admin/unidades/editar/:id', component: CadastroUnidadeComponent, canActivate: [AuthGuard, AdminGuard] },
 
   // Responsáveis por Unidades (Admin Only)
-  { path: 'admin/responsaveis', component: CadastroResponsavelComponent, canActivate: [AuthGuard, AdminGuard] },
+  { path: 'admin/responsaveis', component: ListaUsuariosComponent, canActivate: [AuthGuard, AdminGuard] }, // Reutilizar lista
   { path: 'admin/responsaveis/novo', component: CadastroResponsavelComponent, canActivate: [AuthGuard, AdminGuard] },
   { path: 'admin/responsaveis/editar/:id', component: CadastroResponsavelComponent, canActivate: [AuthGuard, AdminGuard] },
 
@@ -67,7 +64,7 @@ export const routes: Routes = [
   // Configurações (Admin Only)
   { path: 'admin/configuracoes', component: ConfiguracoesComponent, canActivate: [AuthGuard, AdminGuard] },
 
-  // Serviços Designados (Técnico Only)
+  // Serviços Designados (Técnico)
   { path: 'tecnico/servicos', component: ServicosDesignadosComponent, canActivate: [AuthGuard] },
 
   // Extintores (Ambos)
@@ -77,14 +74,8 @@ export const routes: Routes = [
 
   // Inspeções (Ambos)
   { path: 'inspecoes', component: AgendaInspecoesComponent, canActivate: [AuthGuard] },
+  { path: 'inspecoes/nova', component: AgendaInspecoesComponent, canActivate: [AuthGuard] },
   { path: 'inspecoes/checklist/:id', component: ChecklistInspecaoComponent, canActivate: [AuthGuard] },
-  { path: 'inspecoes/historico', component: HistoricoInspecoesComponent, canActivate: [AuthGuard] },
-
-  // Relatórios (Ambos)
-  { path: 'relatorios', component: RelatoriosComponent, canActivate: [AuthGuard] },
-
-  // Documentos (Ambos)
-  { path: 'documentos', component: DocumentosComponent, canActivate: [AuthGuard] },
 
   // Notificações (Ambos)
   { path: 'notificacoes', component: NotificacoesComponent, canActivate: [AuthGuard] },

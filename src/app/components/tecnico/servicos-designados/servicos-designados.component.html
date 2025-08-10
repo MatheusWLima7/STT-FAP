@@ -1,0 +1,154 @@
+<div class="servicos-designados">
+  <div class="page-header">
+    <h1>Meus Serviços Designados</h1>
+    <div class="header-actions">
+      <button class="btn-refresh" (click)="carregarServicos()" [disabled]="loading">
+        <span [class.spinning]="loading">🔄</span> Atualizar
+      </button>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="filtros-container">
+    <div class="filtros-row">
+      <div class="filtro-grupo">
+        <label>Status:</label>
+        <select [(ngModel)]="filtroStatus" 
+                (change)="aplicarFiltros()"
+                class="select-filtro">
+          <option *ngFor="let status of statusOptions" [value]="status.value">
+            {{ status.label }}
+          </option>
+        </select>
+      </div>
+      
+      <div class="filtro-grupo">
+        <label>Prioridade:</label>
+        <select [(ngModel)]="filtroPrioridade" 
+                (change)="aplicarFiltros()"
+                class="select-filtro">
+          <option *ngFor="let prioridade of prioridadeOptions" [value]="prioridade.value">
+            {{ prioridade.label }}
+          </option>
+        </select>
+      </div>
+      
+      <div class="filtro-acoes">
+        <button class="btn-limpar" (click)="limparFiltros()">Limpar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading-container">
+    <div class="spinner"></div>
+    <p>Carregando seus serviços...</p>
+  </div>
+
+  <!-- Erro -->
+  <div *ngIf="error" class="erro-container">
+    <p>{{ error }}</p>
+    <button (click)="carregarServicos()">Tentar novamente</button>
+  </div>
+
+  <!-- Lista de Serviços -->
+  <div *ngIf="!loading && !error" class="servicos-container">
+    
+    <div class="resultados-info">
+      <p>{{ servicosFiltrados.length }} serviço(s) designado(s)</p>
+    </div>
+
+    <div class="servicos-lista">
+      <div *ngFor="let servico of servicosFiltrados" class="servico-card">
+        
+        <div class="card-header">
+          <div class="servico-info">
+            <h3>{{ servico.titulo }}</h3>
+            <p class="descricao">{{ servico.descricao }}</p>
+            <div class="badges">
+              <span class="badge" [ngClass]="obterClasseStatus(servico.status)">
+                {{ servico.status }}
+              </span>
+              <span class="badge" [ngClass]="obterClassePrioridade(servico.prioridade)">
+                {{ servico.prioridade }}
+              </span>
+              <span class="badge tipo">{{ servico.tipoServico }}</span>
+              <span *ngIf="verificarAtraso(servico.dataFim!)" class="badge atrasado">
+                ATRASADO
+              </span>
+            </div>
+          </div>
+          <div class="prazo-info">
+            <div class="dias-restantes" [ngClass]="calcularDiasRestantes(servico.dataFim!) <= 1 ? 'urgente' : ''">
+              <span class="numero">{{ calcularDiasRestantes(servico.dataFim!) }}</span>
+              <span class="texto">dia(s) restante(s)</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <div class="info-row">
+            <span class="label">📅 Início:</span>
+            <span>{{ formatarData(servico.dataInicio) }}</span>
+          </div>
+          
+          <div *ngIf="servico.dataFim" class="info-row">
+            <span class="label">⏰ Prazo:</span>
+            <span [class.text-danger]="verificarAtraso(servico.dataFim)">
+              {{ formatarData(servico.dataFim) }}
+            </span>
+          </div>
+          
+          <div class="info-row">
+            <span class="label">🏢 Unidade:</span>
+            <span>{{ servico.unidadeNome }}</span>
+          </div>
+          
+          <div *ngIf="servico.episSelecionados && servico.episSelecionados.length > 0" class="info-row">
+            <span class="label">🦺 EPIs:</span>
+            <span>{{ servico.episSelecionados.length }} item(s) obrigatório(s)</span>
+          </div>
+          
+          <div *ngIf="servico.medidasControle && servico.medidasControle.length > 0" class="info-row">
+            <span class="label">⚠️ Medidas:</span>
+            <span>{{ servico.medidasControle.length }} medida(s) de controle</span>
+          </div>
+        </div>
+
+        <div class="card-actions">
+          <button class="btn-action btn-info" (click)="verDetalhes(servico)">
+            👁️ Ver Detalhes
+          </button>
+          
+          <button *ngIf="servico.status === 'DESIGNADO'" 
+                  class="btn-action btn-primary" 
+                  (click)="iniciarServico(servico)">
+            ▶️ Iniciar Serviço
+          </button>
+          
+          <button *ngIf="servico.status === 'EM_ANDAMENTO'" 
+                  class="btn-action btn-warning" 
+                  (click)="solicitarProrrogacao(servico)">
+            ⏰ Solicitar Prorrogação
+          </button>
+          
+          <button *ngIf="servico.status === 'EM_ANDAMENTO'" 
+                  class="btn-action btn-success" 
+                  (click)="encerrarServico(servico)">
+            ✅ Encerrar Serviço
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Estado vazio -->
+    <div *ngIf="servicosFiltrados.length === 0" class="empty-state">
+      <div class="empty-icon">📋</div>
+      <h3>Nenhum serviço designado</h3>
+      <p>Você não possui serviços designados no momento.</p>
+      <p>Aguarde novas designações do administrador.</p>
+    </div>
+
+  </div>
+</div>

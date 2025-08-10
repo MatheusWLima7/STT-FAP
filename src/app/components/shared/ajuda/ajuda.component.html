@@ -1,0 +1,176 @@
+<div class="ajuda">
+  <div class="page-header">
+    <h1>Central de Ajuda</h1>
+    <div class="header-actions">
+      <button class="btn-secondary" (click)="voltar()">
+        ← Voltar
+      </button>
+    </div>
+  </div>
+
+  <div class="ajuda-container">
+    
+    <!-- Abas -->
+    <div class="tabs-container">
+      <button class="tab-button" 
+              [class.active]="secaoSelecionada === 'faq'"
+              (click)="selecionarSecao('faq')">
+        ❓ FAQ
+      </button>
+      <button class="tab-button" 
+              [class.active]="secaoSelecionada === 'tutoriais'"
+              (click)="selecionarSecao('tutoriais')">
+        🎥 Tutoriais
+      </button>
+      <button class="tab-button" 
+              [class.active]="secaoSelecionada === 'contato'"
+              (click)="selecionarSecao('contato')">
+        📞 Contato
+      </button>
+    </div>
+
+    <!-- Aba FAQ -->
+    <div *ngIf="secaoSelecionada === 'faq'" class="tab-content">
+      
+      <!-- Busca -->
+      <div class="busca-container">
+        <div class="busca-input">
+          <input type="text" 
+                 [(ngModel)]="termoBusca"
+                 (input)="filtrarFAQ()"
+                 placeholder="Buscar nas perguntas frequentes..."
+                 class="input-busca">
+          <span class="busca-icon">🔍</span>
+        </div>
+      </div>
+
+      <!-- FAQ por Categoria -->
+      <div class="faq-container">
+        <div *ngFor="let categoria of obterCategorias()" class="categoria-section">
+          <h3>{{ categoria }}</h3>
+          
+          <div class="faq-items">
+            <div *ngFor="let item of getFAQPorCategoria(categoria)" class="faq-item">
+              <div class="pergunta">
+                <h4>{{ item.pergunta }}</h4>
+              </div>
+              <div class="resposta">
+                <p>{{ item.resposta }}</p>
+                <div class="tags">
+                  <span *ngFor="let tag of item.tags" class="tag">{{ tag }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Resultado vazio -->
+        <div *ngIf="faqFiltrado.length === 0" class="empty-search">
+          <div class="empty-icon">🔍</div>
+          <h3>Nenhuma resposta encontrada</h3>
+          <p>Tente buscar com outros termos ou entre em contato conosco.</p>
+          <button class="btn-primary" (click)="selecionarSecao('contato')">
+            📞 Entrar em Contato
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Aba Tutoriais -->
+    <div *ngIf="secaoSelecionada === 'tutoriais'" class="tab-content">
+      <div class="tutoriais-container">
+        <h3>Tutoriais em Vídeo</h3>
+        <p>Aprenda a usar o sistema com nossos tutoriais passo a passo.</p>
+        
+        <div class="tutoriais-grid">
+          <div *ngFor="let tutorial of tutoriais" class="tutorial-card">
+            <div class="tutorial-icon">{{ tutorial.icone }}</div>
+            <div class="tutorial-info">
+              <h4>{{ tutorial.titulo }}</h4>
+              <p>{{ tutorial.descricao }}</p>
+              <div class="tutorial-meta">
+                <span class="duracao">⏱️ {{ tutorial.duracao }}</span>
+              </div>
+            </div>
+            <div class="tutorial-actions">
+              <button class="btn-tutorial" (click)="abrirTutorial(tutorial)">
+                ▶️ Assistir
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Aba Contato -->
+    <div *ngIf="secaoSelecionada === 'contato'" class="tab-content">
+      <div class="contato-container">
+        <h3>Entre em Contato</h3>
+        <p>Precisa de ajuda? Nossa equipe está pronta para ajudar você!</p>
+        
+        <div class="contato-opcoes">
+          
+          <div class="opcao-contato">
+            <div class="opcao-icon">📧</div>
+            <div class="opcao-info">
+              <h4>E-mail</h4>
+              <p>Envie sua dúvida por email e responderemos em até 24 horas.</p>
+              <button class="btn-contato" (click)="entrarContato()">
+                Enviar E-mail
+              </button>
+            </div>
+          </div>
+
+          <div class="opcao-contato">
+            <div class="opcao-icon">💬</div>
+            <div class="opcao-info">
+              <h4>Chat Online</h4>
+              <p>Converse conosco em tempo real durante o horário comercial.</p>
+              <button class="btn-contato" (click)="abrirChat()">
+                Iniciar Chat
+              </button>
+            </div>
+          </div>
+
+          <div class="opcao-contato">
+            <div class="opcao-icon">📞</div>
+            <div class="opcao-info">
+              <h4>Telefone</h4>
+              <p>Ligue para nosso suporte técnico.</p>
+              <div class="telefone-info">
+                <strong>(11) 3000-0000</strong>
+                <small>Segunda a Sexta, 8h às 18h</small>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Informações do Sistema -->
+        <div class="sistema-info">
+          <h4>Informações do Sistema</h4>
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="label">Versão:</span>
+              <span>1.0.0</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Usuário:</span>
+              <span>{{ currentUser?.nome }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Perfil:</span>
+              <span>{{ currentUser?.tipoUsuario }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Navegador:</span>
+              <span>{{ obterInfoNavegador() }}</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>

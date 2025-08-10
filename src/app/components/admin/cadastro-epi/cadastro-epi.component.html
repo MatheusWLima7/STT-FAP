@@ -1,0 +1,190 @@
+<div class="cadastro-epi">
+  <div class="page-header">
+    <h1>{{ isEditMode ? 'Editar EPI' : 'Novo EPI' }}</h1>
+    <div class="header-actions">
+      <button class="btn-secondary" (click)="cancelar()">
+        ← Voltar
+      </button>
+    </div>
+  </div>
+
+  <!-- Mensagens -->
+  <div *ngIf="error" class="alert alert-error">
+    {{ error }}
+  </div>
+
+  <div *ngIf="success" class="alert alert-success">
+    {{ success }}
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading-overlay">
+    <div class="spinner"></div>
+    <p>{{ isEditMode ? 'Carregando dados...' : 'Salvando EPI...' }}</p>
+  </div>
+
+  <!-- Formulário -->
+  <form [formGroup]="epiForm" (ngSubmit)="onSubmit()" class="epi-form">
+    
+    <!-- Informações Básicas -->
+    <div class="form-section">
+      <h3>Informações Básicas</h3>
+      <div class="form-grid">
+        
+        <div class="form-group">
+          <label for="nome">Nome do EPI *</label>
+          <input type="text" 
+                 id="nome" 
+                 formControlName="nome"
+                 [class.invalid]="isFieldInvalid('nome')"
+                 placeholder="Ex: Capacete de Segurança">
+          <div *ngIf="isFieldInvalid('nome')" class="field-error">
+            {{ getFieldError('nome') }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="categoria">Categoria *</label>
+          <select id="categoria" 
+                  formControlName="categoria"
+                  [class.invalid]="isFieldInvalid('categoria')">
+            <option value="">Selecione a categoria</option>
+            <option *ngFor="let categoria of categorias" [value]="categoria">
+              {{ categoria }}
+            </option>
+          </select>
+          <div *ngIf="isFieldInvalid('categoria')" class="field-error">
+            {{ getFieldError('categoria') }}
+          </div>
+        </div>
+
+        <div class="form-group full-width">
+          <label for="descricao">Descrição *</label>
+          <textarea id="descricao" 
+                    formControlName="descricao"
+                    [class.invalid]="isFieldInvalid('descricao')"
+                    rows="3"
+                    placeholder="Descrição detalhada do EPI..."
+                    maxlength="500"></textarea>
+          <small>{{ epiForm.get('descricao')?.value?.length || 0 }}/500 caracteres</small>
+          <div *ngIf="isFieldInvalid('descricao')" class="field-error">
+            {{ getFieldError('descricao') }}
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Atividades -->
+    <div class="form-section">
+      <h3>Atividades Aplicáveis *</h3>
+      <div class="checkbox-grid">
+        <div *ngFor="let atividade of atividadesDisponiveis" class="checkbox-item">
+          <input type="checkbox" 
+                 [id]="'atividade-' + atividade"
+                 [checked]="isAtividadeSelecionada(atividade)"
+                 (change)="onAtividadeChange(atividade, $event)">
+          <label [for]="'atividade-' + atividade">{{ atividade }}</label>
+        </div>
+      </div>
+      <div *ngIf="isFieldInvalid('atividades')" class="field-error">
+        Selecione pelo menos uma atividade
+      </div>
+    </div>
+
+    <!-- Perigos -->
+    <div class="form-section">
+      <h3>Categorias de Perigo *</h3>
+      <div class="checkbox-grid">
+        <div *ngFor="let perigo of perigosDisponiveis" class="checkbox-item">
+          <input type="checkbox" 
+                 [id]="'perigo-' + perigo"
+                 [checked]="isPerigoSelecionado(perigo)"
+                 (change)="onPerigoChange(perigo, $event)">
+          <label [for]="'perigo-' + perigo">{{ perigo }}</label>
+        </div>
+      </div>
+      <div *ngIf="isFieldInvalid('categoriasPerigo')" class="field-error">
+        Selecione pelo menos uma categoria de perigo
+      </div>
+    </div>
+
+    <!-- Certificação -->
+    <div class="form-section">
+      <h3>Certificação e Fornecedor</h3>
+      <div class="form-grid">
+        
+        <div class="form-group">
+          <label for="certificacao">Certificação *</label>
+          <input type="text" 
+                 id="certificacao" 
+                 formControlName="certificacao"
+                 [class.invalid]="isFieldInvalid('certificacao')"
+                 placeholder="Ex: CA 12345">
+          <div *ngIf="isFieldInvalid('certificacao')" class="field-error">
+            {{ getFieldError('certificacao') }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="validadeCertificacao">Validade da Certificação *</label>
+          <input type="date" 
+                 id="validadeCertificacao" 
+                 formControlName="validadeCertificacao"
+                 [class.invalid]="isFieldInvalid('validadeCertificacao')">
+          <div *ngIf="isFieldInvalid('validadeCertificacao')" class="field-error">
+            {{ getFieldError('validadeCertificacao') }}
+          </div>
+        </div>
+
+        <div class="form-group full-width">
+          <label for="fornecedor">Fornecedor *</label>
+          <input type="text" 
+                 id="fornecedor" 
+                 formControlName="fornecedor"
+                 [class.invalid]="isFieldInvalid('fornecedor')"
+                 placeholder="Nome do fornecedor">
+          <div *ngIf="isFieldInvalid('fornecedor')" class="field-error">
+            {{ getFieldError('fornecedor') }}
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Observações -->
+    <div class="form-section">
+      <h3>Observações</h3>
+      <div class="form-group">
+        <label for="observacoes">Observações Adicionais</label>
+        <textarea id="observacoes" 
+                  formControlName="observacoes"
+                  rows="4"
+                  placeholder="Informações adicionais sobre o EPI..."
+                  maxlength="500"></textarea>
+        <small>{{ epiForm.get('observacoes')?.value?.length || 0 }}/500 caracteres</small>
+      </div>
+    </div>
+
+    <!-- Ações do Formulário -->
+    <div class="form-actions">
+      <div class="actions-left">
+      </div>
+      
+      <div class="actions-right">
+        <button type="button" 
+                class="btn-secondary" 
+                (click)="cancelar()">
+          Cancelar
+        </button>
+        <button type="submit" 
+                class="btn-primary"
+                [disabled]="epiForm.invalid || loading">
+          {{ isEditMode ? 'Atualizar' : 'Criar' }} EPI
+        </button>
+      </div>
+    </div>
+
+  </form>
+
+</div>

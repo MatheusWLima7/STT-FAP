@@ -1,0 +1,184 @@
+<div class="checklist-inspecao">
+  <div class="page-header">
+    <h1>Checklist de Inspeção</h1>
+    <div class="header-actions">
+      <button class="btn-secondary" (click)="cancelar()">
+        ← Voltar
+      </button>
+    </div>
+  </div>
+
+  <!-- Informações do Extintor -->
+  <div *ngIf="extintor" class="extintor-info">
+    <h3>📋 Extintor {{ extintor.codigo }}</h3>
+    <div class="info-grid">
+      <div class="info-item">
+        <span class="label">Tipo:</span>
+        <span>{{ extintor.tipo }}</span>
+      </div>
+      <div class="info-item">
+        <span class="label">Capacidade:</span>
+        <span>{{ extintor.capacidade }} kg/L</span>
+      </div>
+      <div class="info-item">
+        <span class="label">Localização:</span>
+        <span>{{ extintor.localizacao }}</span>
+      </div>
+      <div class="info-item">
+        <span class="label">Fabricante:</span>
+        <span>{{ extintor.fabricante }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mensagens -->
+  <div *ngIf="error" class="alert alert-error">
+    {{ error }}
+  </div>
+
+  <div *ngIf="success" class="alert alert-success">
+    {{ success }}
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading-overlay">
+    <div class="spinner"></div>
+    <p>Processando inspeção...</p>
+  </div>
+
+  <!-- Formulário de Checklist -->
+  <form [formGroup]="checklistForm" (ngSubmit)="onSubmit()" class="checklist-form">
+    
+    <!-- Checklist por Categoria -->
+    <div *ngFor="let categoria of obterCategorias()" class="categoria-section">
+      <h3>{{ categoria }}</h3>
+      
+      <div class="checklist-items">
+        <div *ngFor="let item of getItensPorCategoria(categoria)" class="checklist-item">
+          <div class="item-header">
+            <div class="checkbox-container">
+              <input type="checkbox" 
+                     [id]="'item_' + item.id"
+                     [formControlName]="'item_' + item.id + '_conforme'"
+                     (change)="calcularResultado()">
+              <label [for]="'item_' + item.id" class="checkbox-label">
+                {{ item.item }}
+                <span *ngIf="item.obrigatorio" class="obrigatorio">*</span>
+              </label>
+            </div>
+            <div class="item-status">
+              <span *ngIf="checklistForm.get('item_' + item.id + '_conforme')?.value" 
+                    class="status-conforme">✅ Conforme</span>
+              <span *ngIf="!checklistForm.get('item_' + item.id + '_conforme')?.value" 
+                    class="status-nao-conforme">❌ Não Conforme</span>
+            </div>
+          </div>
+          
+          <div class="item-observacao">
+            <label [for]="'obs_' + item.id">Observações:</label>
+            <textarea [id]="'obs_' + item.id"
+                      [formControlName]="'item_' + item.id + '_observacao'"
+                      rows="2"
+                      placeholder="Observações sobre este item..."
+                      maxlength="200"></textarea>
+            <small>{{ checklistForm.get('item_' + item.id + '_observacao')?.value?.length || 0 }}/200</small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Upload de Fotos -->
+    <div class="fotos-section">
+      <h3>📸 Fotos da Inspeção</h3>
+      
+      <div class="upload-area">
+        <input type="file" 
+               #fileInput 
+               accept="image/*" 
+               multiple
+               (change)="onFileSelected($event)"
+               style="display: none">
+        <button type="button" 
+                class="btn-upload" 
+                (click)="fileInput.click()">
+          📷 Adicionar Fotos
+        </button>
+        <small>Máximo 5MB por foto - JPG, PNG ou GIF</small>
+      </div>
+
+      <div *ngIf="previewFotos.length > 0" class="fotos-preview">
+        <div *ngFor="let foto of previewFotos; let i = index" class="foto-preview">
+          <img [src]="foto" alt="Preview">
+          <button type="button" class="btn-remover" (click)="removerFoto(i)">❌</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Observações Gerais -->
+    <div class="observacoes-section">
+      <h3>📝 Observações Gerais</h3>
+      <textarea formControlName="observacoesGerais"
+                rows="4"
+                placeholder="Observações gerais sobre a inspeção..."
+                maxlength="1000"></textarea>
+      <small>{{ checklistForm.get('observacoesGerais')?.value?.length || 0 }}/1000 caracteres</small>
+    </div>
+
+    <!-- Resultado -->
+    <div class="resultado-section">
+      <h3>📊 Resultado da Inspeção</h3>
+      <div class="resultado-options">
+        <label class="radio-option">
+          <input type="radio" 
+                 formControlName="resultado" 
+                 value="CONFORME">
+          <span class="radio-label conforme">✅ Conforme</span>
+          <small>Extintor em perfeitas condições</small>
+        </label>
+        
+        <label class="radio-option">
+          <input type="radio" 
+                 formControlName="resultado" 
+                 value="NAO_CONFORME">
+          <span class="radio-label nao-conforme">❌ Não Conforme</span>
+          <small>Extintor com problemas críticos</small>
+        </label>
+        
+        <label class="radio-option">
+          <input type="radio" 
+                 formControlName="resultado" 
+                 value="MANUTENCAO_NECESSARIA">
+          <span class="radio-label manutencao">🔧 Manutenção Necessária</span>
+          <small>Extintor precisa de manutenção</small>
+        </label>
+      </div>
+      <div *ngIf="isFieldInvalid('resultado')" class="field-error">
+        Selecione o resultado da inspeção
+      </div>
+    </div>
+
+    <!-- Ações do Formulário -->
+    <div class="form-actions">
+      <div class="actions-left">
+        <button type="button" class="btn-auto" (click)="calcularResultado()">
+          🤖 Calcular Resultado Automaticamente
+        </button>
+      </div>
+      
+      <div class="actions-right">
+        <button type="button" 
+                class="btn-secondary" 
+                (click)="cancelar()">
+          Cancelar
+        </button>
+        <button type="submit" 
+                class="btn-primary"
+                [disabled]="checklistForm.invalid || loading">
+          ✅ Finalizar Inspeção
+        </button>
+      </div>
+    </div>
+
+  </form>
+
+</div>

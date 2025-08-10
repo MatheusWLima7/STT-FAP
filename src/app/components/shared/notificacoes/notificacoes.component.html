@@ -1,0 +1,125 @@
+<div class="notificacoes">
+  <div class="page-header">
+    <h1>Notificações</h1>
+    <div class="header-actions">
+      <span class="contador-nao-lidas" *ngIf="contarNaoLidas() > 0">
+        {{ contarNaoLidas() }} não lida(s)
+      </span>
+      <button class="btn-primary" (click)="marcarTodasComoLidas()" 
+              [disabled]="contarNaoLidas() === 0">
+        ✅ Marcar Todas como Lidas
+      </button>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="filtros-container">
+    <div class="filtros-row">
+      <div class="filtro-grupo">
+        <label>Tipo:</label>
+        <select [(ngModel)]="filtroTipo" 
+                (change)="aplicarFiltros()"
+                class="select-filtro">
+          <option *ngFor="let tipo of tipoOptions" [value]="tipo.value">
+            {{ tipo.label }}
+          </option>
+        </select>
+      </div>
+      
+      <div class="filtro-grupo">
+        <label>Categoria:</label>
+        <select [(ngModel)]="filtroCategoria" 
+                (change)="aplicarFiltros()"
+                class="select-filtro">
+          <option *ngFor="let categoria of categoriaOptions" [value]="categoria.value">
+            {{ categoria.label }}
+          </option>
+        </select>
+      </div>
+      
+      <div class="filtro-grupo">
+        <label>Status:</label>
+        <select [(ngModel)]="filtroStatus" 
+                (change)="aplicarFiltros()"
+                class="select-filtro">
+          <option *ngFor="let status of statusOptions" [value]="status.value">
+            {{ status.label }}
+          </option>
+        </select>
+      </div>
+      
+      <div class="filtro-acoes">
+        <button class="btn-limpar" (click)="limparFiltros()">Limpar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading-container">
+    <div class="spinner"></div>
+    <p>Carregando notificações...</p>
+  </div>
+
+  <!-- Erro -->
+  <div *ngIf="error" class="erro-container">
+    <p>{{ error }}</p>
+    <button (click)="carregarNotificacoes()">Tentar novamente</button>
+  </div>
+
+  <!-- Lista de Notificações -->
+  <div *ngIf="!loading && !error" class="notificacoes-container">
+    
+    <div class="resultados-info">
+      <p>{{ notificacoesFiltradas.length }} notificação(ões) encontrada(s)</p>
+    </div>
+
+    <div class="notificacoes-lista">
+      <div *ngFor="let notificacao of notificacoesFiltradas" 
+           class="notificacao-item"
+           [class.nao-lida]="!notificacao.lida"
+           (click)="marcarComoLida(notificacao)">
+        
+        <div class="notificacao-header">
+          <div class="notificacao-info">
+            <div class="icones">
+              <span class="icone-tipo">{{ obterIconeNotificacao(notificacao.tipo) }}</span>
+              <span class="icone-categoria">{{ obterIconeCategoria(notificacao.categoria) }}</span>
+            </div>
+            <div class="conteudo">
+              <h3>{{ notificacao.titulo }}</h3>
+              <p>{{ notificacao.mensagem }}</p>
+              <div class="meta-info">
+                <span class="badge" [ngClass]="obterClasseTipo(notificacao.tipo)">
+                  {{ notificacao.tipo }}
+                </span>
+                <span class="categoria">{{ notificacao.categoria }}</span>
+                <span class="data">{{ formatarData(notificacao.dataEnvio) }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="notificacao-actions">
+            <div *ngIf="!notificacao.lida" class="indicador-nao-lida"></div>
+            <button class="btn-icon" 
+                    (click)="excluirNotificacao(notificacao); $event.stopPropagation()" 
+                    title="Excluir">
+              🗑️
+            </button>
+          </div>
+        </div>
+
+        <div *ngIf="notificacao.dataLeitura" class="leitura-info">
+          <small>Lida em {{ formatarData(notificacao.dataLeitura) }}</small>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Estado vazio -->
+    <div *ngIf="notificacoesFiltradas.length === 0" class="empty-state">
+      <div class="empty-icon">📢</div>
+      <h3>Nenhuma notificação encontrada</h3>
+      <p>Não há notificações que correspondam aos filtros aplicados.</p>
+    </div>
+
+  </div>
+</div>

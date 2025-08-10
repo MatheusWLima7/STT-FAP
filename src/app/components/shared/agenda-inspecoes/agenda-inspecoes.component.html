@@ -1,0 +1,170 @@
+<div class="agenda-inspecoes">
+  <div class="page-header">
+    <h1>Agenda de Inspeções</h1>
+    <div class="header-actions">
+      <div class="view-toggle">
+        <button class="btn-toggle" 
+                [class.active]="visualizacao === 'lista'"
+                (click)="visualizacao = 'lista'">
+          📋 Lista
+        </button>
+        <button class="btn-toggle" 
+                [class.active]="visualizacao === 'calendario'"
+                (click)="visualizacao = 'calendario'">
+          📅 Calendário
+        </button>
+      </div>
+      <button *ngIf="isAdmin()" class="btn-primary" (click)="novaInspecao()">
+        + Nova Inspeção
+      </button>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="filtros-container">
+    <div class="filtros-row">
+      <div class="filtro-grupo">
+        <label>Status:</label>
+        <select [(ngModel)]="filtroStatus" 
+                (change)="aplicarFiltros()"
+                class="select-filtro">
+          <option *ngFor="let status of statusOptions" [value]="status.value">
+            {{ status.label }}
+          </option>
+        </select>
+      </div>
+      
+      <div class="filtro-grupo">
+        <label>Data:</label>
+        <input type="date" 
+               [(ngModel)]="filtroData" 
+               (change)="aplicarFiltros()"
+               class="input-filtro">
+      </div>
+      
+      <div class="filtro-grupo" *ngIf="isAdmin()">
+        <label>Técnico:</label>
+        <input type="text" 
+               [(ngModel)]="filtroTecnico" 
+               (input)="aplicarFiltros()"
+               placeholder="Nome do técnico..."
+               class="input-filtro">
+      </div>
+      
+      <div class="filtro-acoes">
+        <button class="btn-limpar" (click)="limparFiltros()">Limpar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading-container">
+    <div class="spinner"></div>
+    <p>Carregando agenda...</p>
+  </div>
+
+  <!-- Erro -->
+  <div *ngIf="error" class="erro-container">
+    <p>{{ error }}</p>
+    <button (click)="carregarInspecoes()">Tentar novamente</button>
+  </div>
+
+  <!-- Visualização Lista -->
+  <div *ngIf="!loading && !error && visualizacao === 'lista'" class="inspecoes-container">
+    
+    <div class="resultados-info">
+      <p>{{ inspecoesFiltradas.length }} inspeção(ões) encontrada(s)</p>
+    </div>
+
+    <div class="inspecoes-lista">
+      <div *ngFor="let inspecao of inspecoesFiltradas" class="inspecao-item">
+        
+        <div class="inspecao-header">
+          <div class="inspecao-info">
+            <h3>Extintor {{ inspecao.extintorCodigo }}</h3>
+            <p class="unidade">{{ inspecao.unidadeNome }}</p>
+            <div class="badges">
+              <span class="badge" [ngClass]="obterClasseStatus(inspecao.status)">
+                {{ inspecao.status }}
+              </span>
+              <span *ngIf="verificarAtraso(inspecao.dataAgendada) && inspecao.status === 'AGENDADA'" 
+                    class="badge status-atrasada">
+                ATRASADA
+              </span>
+            </div>
+          </div>
+          <div class="inspecao-actions">
+            <button *ngIf="inspecao.status === 'AGENDADA' || inspecao.status === 'ATRASADA'" 
+                    class="btn-action btn-primary" 
+                    (click)="realizarInspecao(inspecao)">
+              🔍 Realizar
+            </button>
+            <button *ngIf="isAdmin() && inspecao.status === 'AGENDADA'" 
+                    class="btn-action btn-warning" 
+                    (click)="reagendarInspecao(inspecao)">
+              📅 Reagendar
+            </button>
+            <button *ngIf="isAdmin() && inspecao.status !== 'CONCLUIDA'" 
+                    class="btn-action btn-danger" 
+                    (click)="cancelarInspecao(inspecao)">
+              ❌ Cancelar
+            </button>
+          </div>
+        </div>
+
+        <div class="inspecao-body">
+          <div class="info-row">
+            <span class="label">📅 Data Agendada:</span>
+            <span [class.text-danger]="verificarAtraso(inspecao.dataAgendada)">
+              {{ formatarDataHora(inspecao.dataAgendada) }}
+            </span>
+          </div>
+          
+          <div *ngIf="inspecao.tecnicoNome" class="info-row">
+            <span class="label">👤 Técnico:</span>
+            <span>{{ inspecao.tecnicoNome }}</span>
+          </div>
+          
+          <div *ngIf="inspecao.dataRealizada" class="info-row">
+            <span class="label">✅ Realizada em:</span>
+            <span>{{ formatarDataHora(inspecao.dataRealizada) }}</span>
+          </div>
+          
+          <div *ngIf="inspecao.resultado" class="info-row">
+            <span class="label">📊 Resultado:</span>
+            <span [ngClass]="'resultado-' + inspecao.resultado?.toLowerCase()">
+              {{ inspecao.resultado }}
+            </span>
+          </div>
+          
+          <div *ngIf="inspecao.observacoes" class="info-row">
+            <span class="label">📝 Observações:</span>
+            <span>{{ inspecao.observacoes }}</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Estado vazio -->
+    <div *ngIf="inspecoesFiltradas.length === 0" class="empty-state">
+      <div class="empty-icon">📅</div>
+      <h3>Nenhuma inspeção encontrada</h3>
+      <p>Não há inspeções que correspondam aos filtros aplicados.</p>
+      <button *ngIf="isAdmin()" class="btn-primary" (click)="novaInspecao()">
+        Agendar primeira inspeção
+      </button>
+    </div>
+
+  </div>
+
+  <!-- Visualização Calendário (Placeholder) -->
+  <div *ngIf="!loading && !error && visualizacao === 'calendario'" class="calendario-container">
+    <div class="calendario-placeholder">
+      <h3>📅 Visualização em Calendário</h3>
+      <p>Funcionalidade em desenvolvimento</p>
+      <p>Por enquanto, utilize a visualização em lista.</p>
+    </div>
+  </div>
+
+</div>

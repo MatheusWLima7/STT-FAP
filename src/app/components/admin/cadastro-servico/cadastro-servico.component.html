@@ -1,0 +1,215 @@
+<div class="cadastro-servico">
+  <div class="page-header">
+    <h1>{{ isEditMode ? 'Editar Serviço' : 'Novo Serviço' }}</h1>
+    <div class="header-actions">
+      <button class="btn-secondary" (click)="cancelar()">
+        ← Voltar
+      </button>
+    </div>
+  </div>
+
+  <!-- Mensagens -->
+  <div *ngIf="error" class="alert alert-error">
+    {{ error }}
+  </div>
+
+  <div *ngIf="success" class="alert alert-success">
+    {{ success }}
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading-overlay">
+    <div class="spinner"></div>
+    <p>{{ isEditMode ? 'Carregando dados...' : 'Salvando serviço...' }}</p>
+  </div>
+
+  <!-- Formulário -->
+  <form [formGroup]="servicoForm" (ngSubmit)="onSubmit()" class="servico-form">
+    
+    <!-- Informações Básicas -->
+    <div class="form-section">
+      <h3>Informações do Serviço</h3>
+      <div class="form-grid">
+        
+        <div class="form-group full-width">
+          <label for="titulo">Título do Serviço *</label>
+          <input type="text" 
+                 id="titulo" 
+                 formControlName="titulo"
+                 [class.invalid]="isFieldInvalid('titulo')"
+                 placeholder="Ex: Inspeção de Extintores - Setor A">
+          <div *ngIf="isFieldInvalid('titulo')" class="field-error">
+            {{ getFieldError('titulo') }}
+          </div>
+        </div>
+
+        <div class="form-group full-width">
+          <label for="descricao">Descrição *</label>
+          <textarea id="descricao" 
+                    formControlName="descricao"
+                    [class.invalid]="isFieldInvalid('descricao')"
+                    rows="3"
+                    placeholder="Descrição detalhada do serviço..."
+                    maxlength="500"></textarea>
+          <small>{{ servicoForm.get('descricao')?.value?.length || 0 }}/500 caracteres</small>
+          <div *ngIf="isFieldInvalid('descricao')" class="field-error">
+            {{ getFieldError('descricao') }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="unidadeId">Unidade *</label>
+          <select id="unidadeId" 
+                  formControlName="unidadeId"
+                  [class.invalid]="isFieldInvalid('unidadeId')">
+            <option value="">Selecione a unidade</option>
+            <option *ngFor="let unidade of unidades" [value]="unidade.id">
+              {{ unidade.nome }}
+            </option>
+          </select>
+          <div *ngIf="isFieldInvalid('unidadeId')" class="field-error">
+            {{ getFieldError('unidadeId') }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="tecnicoId">Técnico Responsável</label>
+          <select id="tecnicoId" formControlName="tecnicoId">
+            <option value="">Selecionar depois</option>
+            <option *ngFor="let tecnico of tecnicos" [value]="tecnico.id">
+              {{ tecnico.nome }}
+            </option>
+          </select>
+          <small>Pode ser definido posteriormente</small>
+        </div>
+
+        <div class="form-group">
+          <label for="tipoServico">Tipo de Serviço *</label>
+          <select id="tipoServico" 
+                  formControlName="tipoServico"
+                  (change)="calcularDataFim()"
+                  [class.invalid]="isFieldInvalid('tipoServico')">
+            <option *ngFor="let tipo of tiposServico" [value]="tipo.value">
+              {{ tipo.label }}
+            </option>
+          </select>
+          <div *ngIf="isFieldInvalid('tipoServico')" class="field-error">
+            {{ getFieldError('tipoServico') }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="prioridade">Prioridade *</label>
+          <select id="prioridade" 
+                  formControlName="prioridade"
+                  [class.invalid]="isFieldInvalid('prioridade')">
+            <option *ngFor="let prioridade of prioridades" [value]="prioridade.value">
+              {{ prioridade.label }}
+            </option>
+          </select>
+          <div *ngIf="isFieldInvalid('prioridade')" class="field-error">
+            {{ getFieldError('prioridade') }}
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Cronograma -->
+    <div class="form-section">
+      <h3>Cronograma</h3>
+      <div class="form-grid">
+        
+        <div class="form-group">
+          <label for="dataInicio">Data de Início *</label>
+          <input type="date" 
+                 id="dataInicio" 
+                 formControlName="dataInicio"
+                 (change)="calcularDataFim()"
+                 [class.invalid]="isFieldInvalid('dataInicio')">
+          <div *ngIf="isFieldInvalid('dataInicio')" class="field-error">
+            {{ getFieldError('dataInicio') }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="dataFim">Data de Fim</label>
+          <input type="date" 
+                 id="dataFim" 
+                 formControlName="dataFim">
+          <small>Calculada automaticamente baseada no tipo de serviço</small>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- EPIs -->
+    <div class="form-section">
+      <h3>EPIs Obrigatórios</h3>
+      <div class="checkbox-grid">
+        <div *ngFor="let epi of episDisponiveis" class="checkbox-item">
+          <input type="checkbox" 
+                 [id]="'epi-' + epi.id"
+                 [checked]="isEPISelecionado(epi.id)"
+                 (change)="onEPIChange(epi.id, $event)">
+          <label [for]="'epi-' + epi.id">
+            <strong>{{ epi.nome }}</strong>
+            <span class="epi-categoria">{{ epi.categoria }}</span>
+          </label>
+        </div>
+      </div>
+      <div *ngIf="episDisponiveis.length === 0" class="sem-dados">
+        Nenhum EPI cadastrado no sistema
+      </div>
+    </div>
+
+    <!-- Medidas de Controle -->
+    <div class="form-section">
+      <h3>Medidas de Controle Recomendadas</h3>
+      <div class="checkbox-grid">
+        <div *ngFor="let medida of medidasControleDisponiveis" class="checkbox-item">
+          <input type="checkbox" 
+                 [id]="'medida-' + medida"
+                 [checked]="isMedidaSelecionada(medida)"
+                 (change)="onMedidaControleChange(medida, $event)">
+          <label [for]="'medida-' + medida">{{ medida }}</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Observações -->
+    <div class="form-section">
+      <h3>Observações</h3>
+      <div class="form-group">
+        <label for="observacoes">Observações Adicionais</label>
+        <textarea id="observacoes" 
+                  formControlName="observacoes"
+                  rows="4"
+                  placeholder="Informações adicionais sobre o serviço..."
+                  maxlength="500"></textarea>
+        <small>{{ servicoForm.get('observacoes')?.value?.length || 0 }}/500 caracteres</small>
+      </div>
+    </div>
+
+    <!-- Ações do Formulário -->
+    <div class="form-actions">
+      <div class="actions-left">
+      </div>
+      
+      <div class="actions-right">
+        <button type="button" 
+                class="btn-secondary" 
+                (click)="cancelar()">
+          Cancelar
+        </button>
+        <button type="submit" 
+                class="btn-primary"
+                [disabled]="servicoForm.invalid || loading">
+          {{ isEditMode ? 'Atualizar' : 'Criar' }} Serviço
+        </button>
+      </div>
+    </div>
+
+  </form>
+
+</div>
